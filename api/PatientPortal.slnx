@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="PatientPortal.Api.IntegrationTests/PatientPortal.Api.IntegrationTests.csproj" />
+  <Project Path="PatientPortal.Api/PatientPortal.Api.csproj" />
+  <Project Path="PatientPortal.Core.Tests/PatientPortal.Core.Tests.csproj" />
+  <Project Path="PatientPortal.Core/PatientPortal.Core.csproj" />
+  <Project Path="PatientPortal.Migrations/PatientPortal.Migrations.csproj" />
+</Solution>
