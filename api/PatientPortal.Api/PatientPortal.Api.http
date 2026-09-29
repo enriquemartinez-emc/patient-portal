@@ -1,6 +1,6 @@
 @PatientPortal.Api_HostAddress = http://localhost:5246
 
-GET {{PatientPortal.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+GET {{PatientPortal.Api_HostAddress}}/health
+Accept: text/plain
 
 ###
