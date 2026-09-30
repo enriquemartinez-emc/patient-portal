@@ -25,9 +25,17 @@ docker info >/dev/null 2>&1 || { echo "Docker is not running. Start Docker Deskt
 [ -f web/.env.local ] || { cp web/.env.example web/.env.local; echo "Created web/.env.local from web/.env.example"; }
 
 port_in_use() { (exec 3<>"/dev/tcp/127.0.0.1/$1") 2>/dev/null; }
+port_owner() {
+  if command -v lsof >/dev/null; then
+    lsof -nP -iTCP:"$1" -sTCP:LISTEN 2>/dev/null | awk 'NR > 1 { print $1 " (pid " $2 ")"; exit }'
+  elif command -v ss >/dev/null; then
+    ss -ltnp "sport = :$1" 2>/dev/null | sed -n '2s/.*users:((\("[^"]*"\),pid=\([0-9]*\).*/\1 (pid \2)/p'
+  fi
+}
 for port in 3000 5246; do
   if port_in_use "$port"; then
-    echo "Port $port is already in use. Is another ./dev.sh (or a dev server) still running?" >&2
+    owner=$(port_owner "$port")
+    echo "Port $port is already in use${owner:+ by $owner}. Is another ./dev.sh (or a dev server) still running?" >&2
     exit 1
   fi
 done
@@ -39,29 +47,34 @@ migration_log=$(docker compose run --rm --quiet-pull migrations 2>&1) || { echo 
 
 [ -d web/node_modules ] || (cd web && pnpm install)
 
-# Job control gives each app its own process group, so it can be stopped as a whole.
 set -m
 prefix() { awk -v tag="[$1]" '{ print tag, $0; fflush() }'; }
+# Each app is its own process group, so it stops as a whole. dotnet watch ignores SIGTERM when it
+# runs under a terminal, so the apps get the SIGINT that Ctrl+C would have sent them. Further
+# signals are ignored while stopping: a second Ctrl+C must not abort this and leave an app running
+# and holding its port.
 cleanup() {
-  trap - INT TERM EXIT
+  trap '' INT TERM HUP
+  trap - EXIT
+  stopping=1
   local pids
   pids=$(jobs -p)
-  for pid in $pids; do kill -TERM -- "-$pid" 2>/dev/null || true; done
-  for _ in 1 2 3 4 5 6 7 8 9 10; do
-    [ -z "$(jobs -r)" ] && return
-    sleep 1
-  done
-  for pid in $pids; do kill -KILL -- "-$pid" 2>/dev/null || true; done
+  for pid in $pids; do kill -INT -- "-$pid" 2>/dev/null || true; done
+  (sleep 8; for pid in $pids; do kill -KILL -- "-$pid" 2>/dev/null; done) &
+  local watchdog=$!
+  disown "$watchdog"
+  wait $pids 2>/dev/null || true
+  kill -KILL -- "-$watchdog" 2>/dev/null || true
 }
-trap cleanup INT TERM EXIT
+trap cleanup INT TERM HUP EXIT
 
 # Job control puts each app in a background process group, and the terminal stops any background
 # process that reads from it. dotnet watch does (it listens for Ctrl+R), so without `< /dev/null` it
 # is suspended before it starts and the web app runs with no API behind it.
 (cd api && exec dotnet watch run --project PatientPortal.Api --non-interactive) < /dev/null 2>&1 | prefix api &
-api_pid=$!
+api_pid=$(jobs -p %+)
 (cd web && exec pnpm dev) < /dev/null 2>&1 | prefix web &
-web_pid=$!
+web_pid=$(jobs -p %+)
 
 # Announce once the API answers, so nobody signs in while it is still building.
 (
@@ -86,5 +99,7 @@ web_pid=$!
 EOF2
 ) &
 
-# If either one exits on its own, stop the other and report it.
-wait -n "$api_pid" "$web_pid"
+wait -n "$api_pid" "$web_pid" || true
+if [ -z "${stopping:-}" ]; then
+  echo "One of the apps stopped on its own, so the other is being stopped too. See its output above." >&2
+fi
