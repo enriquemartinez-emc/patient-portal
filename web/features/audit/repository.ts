@@ -68,9 +68,12 @@ function toEntry(wire: AuditEntryWire): AuditEntry {
 
 export async function listAuditTrail(
   patientId: string,
-  options: { page: number; action?: AuditActionType }
+  options: { page: number; pageSize?: number; action?: AuditActionType }
 ): Promise<Paged<AuditEntry>> {
   const query = new URLSearchParams({ page: String(options.page) })
+  if (options.pageSize) {
+    query.set("pageSize", String(options.pageSize))
+  }
   if (options.action) {
     query.set("action", options.action)
   }

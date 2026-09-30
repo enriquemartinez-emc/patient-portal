@@ -9,9 +9,10 @@ export type NavItem = {
 
 export const navigation: Record<SessionKind, readonly NavItem[]> = {
   patient: [
+    { label: "Dashboard", href: "/patient", activeOn: [] },
     {
       label: "Lab results",
-      href: "/patient",
+      href: "/patient/lab-results",
       activeOn: ["/patient/lab-results"],
     },
     { label: "Consents", href: "/patient/consents", activeOn: [] },

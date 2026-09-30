@@ -32,6 +32,20 @@ test.describe("clinician", () => {
           )
           .first()
       ).toBeVisible()
+
+      await emily.goto("/patient")
+      await expect(
+        emily.getByRole("img", {
+          name: /Times your results were opened each day/,
+        })
+      ).toBeVisible()
+      await expect(
+        emily
+          .getByText(
+            "Dr. Sarah Thompson (Northside Clinic) viewed 4 lab results."
+          )
+          .first()
+      ).toBeVisible()
     })
   })
 

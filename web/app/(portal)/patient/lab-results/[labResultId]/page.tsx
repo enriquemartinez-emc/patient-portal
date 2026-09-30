@@ -24,7 +24,7 @@ export default async function LabResultPage({
   return (
     <div className="flex flex-col gap-6">
       <Link
-        href="/patient"
+        href="/patient/lab-results"
         className="text-sm text-muted-foreground hover:text-foreground"
       >
         ← All lab results

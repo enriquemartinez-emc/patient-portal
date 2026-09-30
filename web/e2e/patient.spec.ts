@@ -3,10 +3,37 @@ import { expect, test } from "@playwright/test"
 import { daysAhead, signIn } from "./support"
 
 test.describe("patient", () => {
-  test("reads their lab results and opens one", async ({ page }) => {
+  test("sees an overview of results, sharing and access on the dashboard", async ({
+    page,
+  }) => {
     await signIn(page, "emily.carter@demo.example")
 
     await expect(page).toHaveURL("/patient")
+    await expect(
+      page.getByRole("heading", { name: "Welcome back, Emily" })
+    ).toBeVisible()
+    await expect(
+      page.getByRole("link", { name: /^Lab results 4/ })
+    ).toBeVisible()
+    await expect(
+      page.getByRole("link", { name: /^Shared with/ })
+    ).toContainText("Riverside Clinic")
+    for (const card of [
+      "Latest results",
+      "Who has opened your results",
+      "Who can see your results",
+      "Recent access",
+    ]) {
+      await expect(page.getByText(card, { exact: true })).toBeVisible()
+    }
+    await expect(page.getByRole("link", { name: "Hemoglobin" })).toBeVisible()
+  })
+
+  test("reads their lab results and opens one", async ({ page }) => {
+    await signIn(page, "emily.carter@demo.example")
+
+    await page.getByRole("link", { name: "Lab results", exact: true }).click()
+    await expect(page).toHaveURL("/patient/lab-results")
     await expect(page.getByText("4 results on record")).toBeVisible()
     for (const category of [
       "hematology",
@@ -22,7 +49,7 @@ test.describe("patient", () => {
     await expect(page.getByText("13.4 g/dL")).toBeVisible()
 
     await page.getByRole("link", { name: "All lab results" }).click()
-    await expect(page).toHaveURL("/patient")
+    await expect(page).toHaveURL("/patient/lab-results")
   })
 
   test("shares results, changes their mind at the dialog, then revokes and sees both in the history", async ({

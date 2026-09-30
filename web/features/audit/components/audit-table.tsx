@@ -27,7 +27,7 @@ function actorLabel(actor: AuditActor): string {
 }
 
 // One line a patient can read: who did what.
-function describe(entry: AuditEntry): string {
+export function describeAuditEntry(entry: AuditEntry): string {
   const who = actorLabel(entry.actor)
 
   switch (entry.action.type) {
@@ -71,7 +71,7 @@ export function AuditTable({ entries }: { entries: readonly AuditEntry[] }) {
               </time>
             </TableCell>
             <TableCell className="whitespace-normal">
-              {describe(entry)}
+              {describeAuditEntry(entry)}
             </TableCell>
             <TableCell>{auditActionLabels[entry.action.type]}</TableCell>
           </TableRow>
