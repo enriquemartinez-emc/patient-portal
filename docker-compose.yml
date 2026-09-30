@@ -19,6 +19,7 @@ services:
       target: migrations
     environment:
       MIGRATIONS_CONNECTION_STRING: Host=postgres;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+      PP_APP_PASSWORD: ${PP_APP_PASSWORD}
       MIGRATIONS_INCLUDE_DEV_SEED: "true"
     depends_on:
       postgres:

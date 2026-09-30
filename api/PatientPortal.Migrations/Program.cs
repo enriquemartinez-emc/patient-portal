@@ -1,9 +1,10 @@
 using PatientPortal.Migrations;
 
 var connectionString = Environment.GetEnvironmentVariable("MIGRATIONS_CONNECTION_STRING");
-if (string.IsNullOrWhiteSpace(connectionString))
+var appPassword = Environment.GetEnvironmentVariable("PP_APP_PASSWORD");
+if (string.IsNullOrWhiteSpace(connectionString) || string.IsNullOrWhiteSpace(appPassword))
 {
-    Console.Error.WriteLine("MIGRATIONS_CONNECTION_STRING is not set.");
+    Console.Error.WriteLine("MIGRATIONS_CONNECTION_STRING and PP_APP_PASSWORD must be set.");
     return 1;
 }
 
@@ -13,7 +14,7 @@ var includeDevSeed = string.Equals(
     StringComparison.OrdinalIgnoreCase
 );
 
-var result = MigrationRunner.Run(connectionString, includeDevSeed);
+var result = MigrationRunner.Run(connectionString, appPassword, includeDevSeed);
 if (!result.Successful)
 {
     Console.Error.WriteLine(result.Error);

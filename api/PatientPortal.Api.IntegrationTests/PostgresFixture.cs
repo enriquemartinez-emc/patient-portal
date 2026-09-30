@@ -6,26 +6,64 @@ namespace PatientPortal.Api.IntegrationTests;
 
 public sealed class PostgresFixture : IAsyncLifetime
 {
+    public const string AppRole = "pp_app";
+    public const string AppPassword = "integration-tests-app-password";
+
     private readonly PostgreSqlContainer _container = new PostgreSqlBuilder("postgres:18").Build();
 
-    public string ConnectionString => _container.GetConnectionString();
+    // Connects as the migration user, which owns the schema.
+    public string OwnerConnectionString => _container.GetConnectionString();
+
+    public string AppConnectionString =>
+        new NpgsqlConnectionStringBuilder(OwnerConnectionString)
+        {
+            Username = AppRole,
+            Password = AppPassword,
+        }.ConnectionString;
 
     public async Task InitializeAsync()
     {
         await _container.StartAsync();
+        RunMigrations(OwnerConnectionString, includeDevSeed: false);
+    }
 
-        var result = MigrationRunner.Run(ConnectionString, includeDevSeed: false);
+    public async Task DisposeAsync() => await _container.DisposeAsync();
+
+    public Task<NpgsqlConnection> OpenOwnerConnectionAsync() => OpenAsync(OwnerConnectionString);
+
+    public Task<NpgsqlConnection> OpenAppConnectionAsync() => OpenAsync(AppConnectionString);
+
+    // Creates an empty database in the same container and migrates it.
+    public async Task<string> CreateMigratedDatabaseAsync(bool includeDevSeed)
+    {
+        var name = $"db_{Guid.NewGuid():N}";
+        await using (var owner = await OpenOwnerConnectionAsync())
+        {
+            await using var create = new NpgsqlCommand($"CREATE DATABASE {name}", owner);
+            await create.ExecuteNonQueryAsync();
+        }
+
+        var connectionString = new NpgsqlConnectionStringBuilder(OwnerConnectionString)
+        {
+            Database = name,
+            Pooling = false,
+        }.ConnectionString;
+        RunMigrations(connectionString, includeDevSeed);
+        return connectionString;
+    }
+
+    private static void RunMigrations(string connectionString, bool includeDevSeed)
+    {
+        var result = MigrationRunner.Run(connectionString, AppPassword, includeDevSeed);
         if (!result.Successful)
         {
             throw new InvalidOperationException("Migrations failed.", result.Error);
         }
     }
 
-    public async Task DisposeAsync() => await _container.DisposeAsync();
-
-    public async Task<NpgsqlConnection> OpenConnectionAsync()
+    private static async Task<NpgsqlConnection> OpenAsync(string connectionString)
     {
-        var connection = new NpgsqlConnection(ConnectionString);
+        var connection = new NpgsqlConnection(connectionString);
         await connection.OpenAsync();
         return connection;
     }
