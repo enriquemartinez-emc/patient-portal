@@ -22,10 +22,18 @@ done
 [ -f .env ] || { cp .env.example .env; echo "Created .env from .env.example"; }
 [ -f web/.env.local ] || { cp web/.env.example web/.env.local; echo "Created web/.env.local from web/.env.example"; }
 
+port_in_use() { (exec 3<>"/dev/tcp/127.0.0.1/$1") 2>/dev/null; }
+for port in 3000 5246; do
+  if port_in_use "$port"; then
+    echo "Port $port is already in use. Is another ./dev.sh (or a dev server) still running?" >&2
+    exit 1
+  fi
+done
+
 echo "Starting Postgres, Keycloak and the database migrations..."
 docker compose stop web api >/dev/null 2>&1 || true # the containerised copies use the same ports
 docker compose up -d --wait postgres keycloak
-docker compose run --rm --quiet-pull migrations >/dev/null || { docker compose logs migrations >&2; exit 1; }
+migration_log=$(docker compose run --rm --quiet-pull migrations 2>&1) || { echo "$migration_log" >&2; exit 1; }
 
 [ -d web/node_modules ] || (cd web && pnpm install)
 
@@ -45,8 +53,17 @@ cleanup() {
 }
 trap cleanup INT TERM EXIT
 
-cat <<'EOF2'
+(cd api && exec dotnet watch run --project PatientPortal.Api --non-interactive) 2>&1 | prefix api &
+api_pid=$!
+(cd web && exec pnpm dev) 2>&1 | prefix web &
+web_pid=$!
 
+# Announce once the API answers, so nobody signs in while it is still building.
+(
+  until curl -fs -o /dev/null http://localhost:5246/health; do sleep 1; done
+  cat <<'EOF2'
+
+  Ready
   Web       http://localhost:3000   (sign in with a demo account listed on the page)
   API       http://localhost:5246
   Keycloak  http://localhost:8080
@@ -54,9 +71,7 @@ cat <<'EOF2'
   Ctrl+C stops the API and the web app. Postgres and Keycloak keep running (./dev.sh down stops them).
 
 EOF2
-
-(cd api && exec dotnet watch run --project PatientPortal.Api --non-interactive) 2>&1 | prefix api &
-(cd web && exec pnpm dev) 2>&1 | prefix web &
+) &
 
 # If either one exits on its own, stop the other and report it.
-wait -n
+wait -n "$api_pid" "$web_pid"
