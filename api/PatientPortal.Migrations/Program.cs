@@ -1,12 +1,14 @@
 using PatientPortal.Migrations;
 
 var connectionString = Environment.GetEnvironmentVariable("MIGRATIONS_CONNECTION_STRING");
-var appPassword = Environment.GetEnvironmentVariable("PP_APP_PASSWORD");
-if (string.IsNullOrWhiteSpace(connectionString) || string.IsNullOrWhiteSpace(appPassword))
+if (string.IsNullOrWhiteSpace(connectionString))
 {
-    Console.Error.WriteLine("MIGRATIONS_CONNECTION_STRING and PP_APP_PASSWORD must be set.");
+    Console.Error.WriteLine("MIGRATIONS_CONNECTION_STRING must be set.");
     return 1;
 }
+
+// Optional: when unset, the application role keeps whatever password it already has.
+var appRolePassword = Environment.GetEnvironmentVariable("APP_ROLE_PASSWORD");
 
 var includeDevSeed = string.Equals(
     Environment.GetEnvironmentVariable("MIGRATIONS_INCLUDE_DEV_SEED"),
@@ -14,7 +16,7 @@ var includeDevSeed = string.Equals(
     StringComparison.OrdinalIgnoreCase
 );
 
-var result = MigrationRunner.Run(connectionString, appPassword, includeDevSeed);
+var result = MigrationRunner.Run(connectionString, appRolePassword, includeDevSeed);
 if (!result.Successful)
 {
     Console.Error.WriteLine(result.Error);

@@ -9,7 +9,7 @@ Status: accepted
 - **Explicit actor and subject ids in routes** (`/patients/{patientId}`, `/clinicians/{clinicianId}`,
   `/researchers/{researcherId}`). Once authentication exists, a resource handler checks the route id against the caller.
 - **Audit atomicity.** Reads and their `AuditLogEntry` insert share one transaction.
-- **Append-only audit log** enforced by Postgres permissions (`pp_app` has `INSERT, SELECT` only) plus a trigger.
+- **Append-only audit log** enforced by Postgres permissions (`patient_portal_app` has `INSERT, SELECT` only) plus a trigger.
 - **Lifecycle state as sum types**, not enums or booleans.
 - **BFF token isolation.** The browser never receives the Keycloak access token.
 - **`api` and `postgres` publish no host ports.**

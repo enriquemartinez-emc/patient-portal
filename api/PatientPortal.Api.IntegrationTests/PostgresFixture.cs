@@ -6,7 +6,7 @@ namespace PatientPortal.Api.IntegrationTests;
 
 public sealed class PostgresFixture : IAsyncLifetime
 {
-    public const string AppRole = "pp_app";
+    public const string AppRole = "patient_portal_app";
     public const string AppPassword = "integration-tests-app-password";
 
     private readonly PostgreSqlContainer _container = new PostgreSqlBuilder("postgres:18").Build();
