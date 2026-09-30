@@ -1,3 +1,5 @@
+import { Eye, FlaskConical, ShieldCheck } from "lucide-react"
+
 import {
   Card,
   CardContent,
@@ -78,12 +80,16 @@ export default async function PatientDashboardPage() {
                 : `Latest collected ${formatDate(results[0].collectedAt)}`
             }
             href="/patient/lab-results"
+            icon={FlaskConical}
+            tone="sky"
           />
           <StatTile
             label="Shared with"
             value={active.length}
             hint={sharedHint}
             href="/patient/consents"
+            icon={ShieldCheck}
+            tone="emerald"
           />
           <StatTile
             label={`Views in ${RECENT_DAYS} days`}
@@ -94,6 +100,9 @@ export default async function PatientDashboardPage() {
                 : "Every view is recorded"
             }
             href="/patient/access-history"
+            icon={Eye}
+            tone="violet"
+            alert={refused > 0}
           />
         </div>
 

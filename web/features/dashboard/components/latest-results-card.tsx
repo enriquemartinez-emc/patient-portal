@@ -1,6 +1,5 @@
 import Link from "next/link"
 
-import { Badge } from "@/components/ui/badge"
 import {
   Card,
   CardAction,
@@ -16,6 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { CategoryBadge } from "@/features/lab-results/components/category-label"
 import type { LabResult } from "@/features/lab-results/types"
 import { formatDate } from "@/lib/format"
 
@@ -66,9 +66,7 @@ export function LatestResultsCard({
                     </Link>
                   </TableCell>
                   <TableCell className="hidden sm:table-cell">
-                    <Badge variant="secondary" className="capitalize">
-                      {result.category}
-                    </Badge>
+                    <CategoryBadge category={result.category} />
                   </TableCell>
                   <TableCell>
                     {result.value} {result.unit}

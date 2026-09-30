@@ -15,6 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { AuditActionBadge } from "@/features/audit/components/audit-action-badge"
 import { describeAuditEntry } from "@/features/audit/components/audit-table"
 import type { AuditEntry } from "@/features/audit/types"
 import { formatDateTime } from "@/lib/format"
@@ -50,6 +51,7 @@ export function RecentAccessCard({
             <TableHeader>
               <TableRow>
                 <TableHead>When</TableHead>
+                <TableHead>Action</TableHead>
                 <TableHead>What happened</TableHead>
               </TableRow>
             </TableHeader>
@@ -60,6 +62,9 @@ export function RecentAccessCard({
                     <time dateTime={entry.occurredAt}>
                       {formatDateTime(entry.occurredAt)}
                     </time>
+                  </TableCell>
+                  <TableCell>
+                    <AuditActionBadge type={entry.action.type} />
                   </TableCell>
                   <TableCell className="whitespace-normal">
                     {describeAuditEntry(entry)}
