@@ -44,7 +44,7 @@ export function LabResultsTable({
           >
             {group.category}
           </h2>
-          <Table>
+          <Table className="table-fixed">
             <TableHeader>
               <TableRow>
                 <TableHead>Test</TableHead>

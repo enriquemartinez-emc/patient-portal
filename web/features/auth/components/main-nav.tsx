@@ -11,7 +11,7 @@ export function MainNav({ items }: { items: readonly NavItem[] }) {
   return (
     <nav
       aria-label="Main"
-      className="flex flex-1 flex-wrap items-center gap-4 text-sm"
+      className="order-last flex basis-full flex-wrap items-center gap-4 text-sm sm:order-none sm:flex-1 sm:basis-auto"
     >
       {items.map((item) => {
         const current =
