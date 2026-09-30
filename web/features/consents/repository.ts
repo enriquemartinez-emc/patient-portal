@@ -3,14 +3,14 @@ import "server-only"
 import { z } from "zod"
 
 import type { Consent, Organization } from "@/core/consents/consents.types"
-import { LAB_CATEGORIES } from "@/core/lab-results/lab-results.types"
 import { apiDelete, apiGet, apiPost } from "@/lib/api/server"
+import { categoriesSchema } from "@/lib/api/schemas"
 
 const consentWireSchema = z.object({
   id: z.guid(),
   granteeOrganizationId: z.guid(),
   granteeName: z.string(),
-  categories: z.array(z.enum(LAB_CATEGORIES)),
+  categories: categoriesSchema,
   purpose: z.string(),
   grantedAt: z.iso.datetime({ offset: true }),
   expiresAt: z.iso.datetime({ offset: true }).nullable(),

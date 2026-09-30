@@ -2,15 +2,12 @@ import { PaginationNav } from "@/components/pagination-nav"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
-import {
-  auditActionLabel,
-  parseAuditActionFilter,
-  parsePageNumber,
-} from "@/core/audit/audit.rules"
 import { AUDIT_ACTION_TYPES } from "@/core/audit/audit.types"
 import { AuditTable } from "@/features/audit/components/audit-table"
 import { listAuditTrail } from "@/features/audit/repository"
 import { requireSessionPage } from "@/features/auth/session"
+import { auditActionLabels } from "@/features/audit/view"
+import { parseOneOf, parsePageNumber } from "@/lib/query"
 
 export const metadata = { title: "Access history · Patient Portal" }
 
@@ -22,7 +19,7 @@ export default async function AccessHistoryPage({
   const session = await requireSessionPage("patient")
   const params = await searchParams
   const page = parsePageNumber(params.page)
-  const action = parseAuditActionFilter(params.action)
+  const action = parseOneOf(params.action, AUDIT_ACTION_TYPES)
 
   const trail = await listAuditTrail(session.patientId, { page, action })
 
@@ -51,7 +48,7 @@ export default async function AccessHistoryPage({
             <NativeSelectOption value="">Everything</NativeSelectOption>
             {AUDIT_ACTION_TYPES.map((type) => (
               <NativeSelectOption key={type} value={type}>
-                {auditActionLabel(type)}
+                {auditActionLabels[type]}
               </NativeSelectOption>
             ))}
           </NativeSelect>

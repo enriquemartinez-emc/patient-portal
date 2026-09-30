@@ -5,6 +5,13 @@ import type { LabResult } from "@/core/lab-results/lab-results.types"
 
 // Wire shapes shared by more than one feature's repository. Ids use z.guid() because they come
 // from our own API and only need to be UUID-shaped, not RFC-version-checked.
+// Categories always arrive in the canonical order, so every screen lists them the same way.
+export const categoriesSchema = z
+  .array(z.enum(LAB_CATEGORIES))
+  .transform((categories) =>
+    LAB_CATEGORIES.filter((category) => categories.includes(category))
+  )
+
 export const labResultSchema = z.object({
   id: z.guid(),
   category: z.enum(LAB_CATEGORIES),

@@ -9,9 +9,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { accessBasisLabel } from "@/core/patients/patients.rules"
 import type { PatientSummary } from "@/core/patients/patients.types"
-import { formatDate } from "@/core/shared/dates"
+import { accessBasisLabels } from "@/features/patients/labels"
+import { formatDate } from "@/lib/format"
 
 export function PatientsTable({
   patients,
@@ -54,7 +54,7 @@ export function PatientsTable({
               <div className="flex flex-wrap gap-2">
                 {patient.accessBasis.map((basis) => (
                   <Badge key={basis} variant="outline">
-                    {accessBasisLabel(basis)}
+                    {accessBasisLabels[basis]}
                   </Badge>
                 ))}
               </div>

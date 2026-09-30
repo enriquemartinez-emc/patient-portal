@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest"
 
-import { formatDate, formatDateTime, joinWithAnd } from "./dates"
+import { formatDate, formatDateTime, humanize, joinWithAnd } from "./format"
 
-describe("dates", () => {
+describe("format", () => {
   it("formats a date in UTC regardless of the offset in the input", () => {
     expect(formatDate("2030-10-12T23:30:00-05:00")).toBe("13 Oct 2030")
   })
@@ -12,9 +12,7 @@ describe("dates", () => {
       "12 Oct 2030, 09:30 UTC"
     )
   })
-})
 
-describe("joinWithAnd", () => {
   it.each([
     [[], ""],
     [["a"], "a"],
@@ -22,5 +20,13 @@ describe("joinWithAnd", () => {
     [["a", "b", "c"], "a, b and c"],
   ])("joins %j as %j", (items, expected) => {
     expect(joinWithAnd(items)).toBe(expected)
+  })
+
+  it.each([
+    ["hematology", "Hematology"],
+    ["research_institution", "Research institution"],
+    ["", ""],
+  ])("humanizes %j as %j", (value, expected) => {
+    expect(humanize(value)).toBe(expected)
   })
 })

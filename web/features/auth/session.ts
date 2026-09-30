@@ -4,9 +4,10 @@ import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { cache } from "react"
 
-import { SESSION_COOKIE, homePathFor } from "@/core/auth/auth.rules"
+import { homePathFor } from "@/features/auth/navigation"
 import type { Session, SessionKind } from "@/core/auth/auth.types"
 import { findSessionById, sessionId } from "@/features/auth/demo-accounts"
+import { SESSION_COOKIE } from "@/features/auth/session-cookie"
 
 // Demo authentication: the session cookie names one of the demo accounts. This module is the
 // single place the rest of the app learns who is signed in; real authentication replaces it.

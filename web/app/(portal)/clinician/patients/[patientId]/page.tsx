@@ -4,8 +4,6 @@ import { notFound } from "next/navigation"
 import { AccessDenied } from "@/components/access-denied"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
-import { accessBasisLabel } from "@/core/patients/patients.rules"
-import { formatDate } from "@/core/shared/dates"
 import { requireSessionPage } from "@/features/auth/session"
 import { LabResultsTable } from "@/features/lab-results/components/lab-results-table"
 import {
@@ -13,6 +11,8 @@ import {
   listPatientLabResults,
 } from "@/features/patients/repository"
 import { isForbidden } from "@/lib/api/server"
+import { accessBasisLabels } from "@/features/patients/labels"
+import { formatDate } from "@/lib/format"
 
 export const metadata = { title: "Patient lab results · Patient Portal" }
 
@@ -56,7 +56,7 @@ export default async function ClinicianPatientPage({
         <div className="mt-2 flex flex-wrap gap-2">
           {patient.accessBasis.map((basis) => (
             <Badge key={basis} variant="outline">
-              {accessBasisLabel(basis)}
+              {accessBasisLabels[basis]}
             </Badge>
           ))}
         </div>

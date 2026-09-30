@@ -2,11 +2,11 @@ import "server-only"
 
 import { z } from "zod"
 
-import { LAB_CATEGORIES } from "@/core/lab-results/lab-results.types"
 import type { LabResult } from "@/core/lab-results/lab-results.types"
 import type { ResearchParticipant } from "@/core/research/research.types"
 import { apiGet } from "@/lib/api/server"
 import {
+  categoriesSchema,
   labResultsResponseSchema,
   pagedSchema,
   type Paged,
@@ -14,7 +14,7 @@ import {
 
 const participantSchema = z.object({
   patientId: z.guid(),
-  categories: z.array(z.enum(LAB_CATEGORIES)),
+  categories: categoriesSchema,
 }) satisfies z.ZodType<ResearchParticipant>
 
 export async function listParticipants(

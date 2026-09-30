@@ -6,9 +6,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { auditActionLabel, describeAuditEntry } from "@/core/audit/audit.rules"
 import type { AuditEntry } from "@/core/audit/audit.types"
-import { formatDateTime } from "@/core/shared/dates"
+import { auditActionLabels, describeAuditEntry } from "@/features/audit/view"
+import { formatDateTime } from "@/lib/format"
 
 export function AuditTable({ entries }: { entries: readonly AuditEntry[] }) {
   if (entries.length === 0) {
@@ -37,7 +37,7 @@ export function AuditTable({ entries }: { entries: readonly AuditEntry[] }) {
             <TableCell className="whitespace-normal">
               {describeAuditEntry(entry)}
             </TableCell>
-            <TableCell>{auditActionLabel(entry.action.type)}</TableCell>
+            <TableCell>{auditActionLabels[entry.action.type]}</TableCell>
           </TableRow>
         ))}
       </TableBody>

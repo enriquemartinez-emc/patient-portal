@@ -2,11 +2,11 @@ import Link from "next/link"
 
 import { AccessDenied } from "@/components/access-denied"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { participantLabel } from "@/core/research/research.rules"
 import { requireSessionPage } from "@/features/auth/session"
 import { LabResultsTable } from "@/features/lab-results/components/lab-results-table"
 import { listParticipantLabResults } from "@/features/research/repository"
 import { isForbidden } from "@/lib/api/server"
+import { participantLabel } from "@/features/research/participant-label"
 
 export const metadata = { title: "Participant results · Patient Portal" }
 

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
-import { SESSION_COOKIE } from "@/core/auth/auth.rules"
+import { SESSION_COOKIE } from "@/features/auth/session-cookie"
 
 // Sends visitors without a session cookie to the sign-in page. It only checks the cookie's
 // presence; the layout verifies it, and every action authenticates for itself.

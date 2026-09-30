@@ -9,12 +9,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import {
-  categoryLabel,
-  sortCategories,
-} from "@/core/lab-results/lab-results.rules"
-import { participantLabel } from "@/core/research/research.rules"
 import type { ResearchParticipant } from "@/core/research/research.types"
+import { participantLabel } from "@/features/research/participant-label"
+import { humanize } from "@/lib/format"
 
 export function ParticipantsTable({
   participants,
@@ -53,9 +50,9 @@ export function ParticipantsTable({
             </TableCell>
             <TableCell>
               <div className="flex flex-wrap gap-2">
-                {sortCategories(participant.categories).map((category) => (
+                {participant.categories.map((category) => (
                   <Badge key={category} variant="secondary">
-                    {categoryLabel(category)}
+                    {humanize(category)}
                   </Badge>
                 ))}
               </div>

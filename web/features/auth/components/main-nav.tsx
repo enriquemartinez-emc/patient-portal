@@ -3,8 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
-import { isCurrentPath } from "@/core/auth/auth.rules"
-import type { NavItem } from "@/core/auth/auth.types"
+import { isCurrentPath, type NavItem } from "@/features/auth/navigation"
 
 export function MainNav({ items }: { items: readonly NavItem[] }) {
   const pathname = usePathname()

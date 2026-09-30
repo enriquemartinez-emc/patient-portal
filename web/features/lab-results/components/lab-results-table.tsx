@@ -8,13 +8,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import {
-  categoryLabel,
-  formatResultValue,
-  groupByCategory,
-} from "@/core/lab-results/lab-results.rules"
 import type { LabResult } from "@/core/lab-results/lab-results.types"
-import { formatDate } from "@/core/shared/dates"
+import { LAB_CATEGORIES } from "@/core/lab-results/lab-results.types"
+import { formatDate, humanize } from "@/lib/format"
+
+// Results grouped by category in the fixed category order, leaving out empty categories.
+function groupByCategory(results: readonly LabResult[]) {
+  return LAB_CATEGORIES.map((category) => ({
+    category,
+    results: results.filter((result) => result.category === category),
+  })).filter((group) => group.results.length > 0)
+}
 
 // Results grouped by category. Pass detailHref to make each test name a link.
 export function LabResultsTable({
@@ -35,7 +39,7 @@ export function LabResultsTable({
       {groups.map((group) => (
         <section key={group.category} aria-labelledby={`cat-${group.category}`}>
           <h2 id={`cat-${group.category}`} className="mb-2 text-lg font-medium">
-            {categoryLabel(group.category)}
+            {humanize(group.category)}
           </h2>
           <Table>
             <TableHeader>
@@ -60,7 +64,9 @@ export function LabResultsTable({
                       result.testName
                     )}
                   </TableCell>
-                  <TableCell>{formatResultValue(result)}</TableCell>
+                  <TableCell>
+                    {result.value} {result.unit}
+                  </TableCell>
                   <TableCell>
                     <time dateTime={result.collectedAt}>
                       {formatDate(result.collectedAt)}

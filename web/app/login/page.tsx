@@ -10,10 +10,11 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { homePathFor, personaLabel } from "@/core/auth/auth.rules"
 import { signInAction } from "@/features/auth/actions"
 import { DEMO_PASSWORD, demoAccounts } from "@/features/auth/demo-accounts"
+import { homePathFor } from "@/features/auth/navigation"
 import { getSession, isDemoAuthEnabled } from "@/features/auth/session"
+import { humanize } from "@/lib/format"
 
 export default async function LoginPage({
   searchParams,
@@ -89,7 +90,7 @@ export default async function LoginPage({
               <li key={account.email} className="flex flex-col">
                 <span className="font-mono">{account.email}</span>
                 <span className="text-muted-foreground">
-                  {account.session.name} · {personaLabel(account.session.kind)}
+                  {account.session.name} · {humanize(account.session.kind)}
                 </span>
               </li>
             ))}

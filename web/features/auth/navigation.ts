@@ -1,8 +1,11 @@
-import type { NavItem, Session, SessionKind } from "./auth.types"
+import type { Session } from "@/core/auth/auth.types"
 
-// Name of the cookie that carries the session. Lives in core/ so proxy.ts can share the
-// constant without importing any server code.
-export const SESSION_COOKIE = "demo_session"
+export type NavItem = {
+  label: string
+  href: string
+  // Deeper paths that still belong to this item (a detail page under a list, for example).
+  activeOn: readonly string[]
+}
 
 export function homePathFor(session: Session): string {
   switch (session.kind) {
@@ -15,18 +18,6 @@ export function homePathFor(session: Session): string {
   }
 }
 
-export function personaLabel(kind: SessionKind): string {
-  switch (kind) {
-    case "patient":
-      return "Patient"
-    case "clinician":
-      return "Clinician"
-    case "researcher":
-      return "Researcher"
-  }
-}
-
-// Each persona's navigation.
 export function navigationFor(session: Session): readonly NavItem[] {
   switch (session.kind) {
     case "patient":

@@ -3,13 +3,9 @@ import { notFound } from "next/navigation"
 
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  categoryLabel,
-  formatResultValue,
-} from "@/core/lab-results/lab-results.rules"
-import { formatDateTime } from "@/core/shared/dates"
 import { requireSessionPage } from "@/features/auth/session"
 import { getLabResult } from "@/features/lab-results/repository"
+import { formatDateTime, humanize } from "@/lib/format"
 
 export const metadata = { title: "Lab result · Patient Portal" }
 
@@ -37,13 +33,15 @@ export default async function LabResultPage({
         <CardHeader>
           <CardTitle className="flex items-center gap-3 text-xl">
             {result.testName}
-            <Badge variant="secondary">{categoryLabel(result.category)}</Badge>
+            <Badge variant="secondary">{humanize(result.category)}</Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
           <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-sm">
             <dt className="text-muted-foreground">Result</dt>
-            <dd className="font-medium">{formatResultValue(result)}</dd>
+            <dd className="font-medium">
+              {result.value} {result.unit}
+            </dd>
             <dt className="text-muted-foreground">Collected</dt>
             <dd>
               <time dateTime={result.collectedAt}>

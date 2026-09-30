@@ -1,10 +1,10 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { formErrorMessage, groupByStatus } from "@/core/consents/consents.rules"
 import type { Consent } from "@/core/consents/consents.types"
 import { requireSessionPage } from "@/features/auth/session"
 import { ConsentCard } from "@/features/consents/components/consent-card"
 import { GrantConsentForm } from "@/features/consents/components/grant-consent-form"
 import { listConsents, listOrganizations } from "@/features/consents/repository"
+import { formErrorMessage, groupByStatus } from "@/features/consents/view"
 
 export const metadata = { title: "Consents · Patient Portal" }
 

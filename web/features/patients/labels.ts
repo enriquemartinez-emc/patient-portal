@@ -1,0 +1,6 @@
+import type { AccessBasis } from "@/core/patients/patients.types"
+
+export const accessBasisLabels: Record<AccessBasis, string> = {
+  treatment: "You treat this patient",
+  consent: "Shared with your organization",
+}

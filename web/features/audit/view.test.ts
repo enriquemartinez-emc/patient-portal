@@ -1,12 +1,8 @@
 import { describe, expect, it } from "vitest"
 
-import {
-  auditActionLabel,
-  describeAuditEntry,
-  parseAuditActionFilter,
-  parsePageNumber,
-} from "./audit.rules"
-import type { AuditEntry } from "./audit.types"
+import type { AuditEntry } from "@/core/audit/audit.types"
+
+import { describeAuditEntry } from "./view"
 
 const clinician = {
   kind: "clinician",
@@ -63,27 +59,5 @@ describe("describeAuditEntry", () => {
         entry(patient, { type: "consent_revoked", consentId: "c" })
       )
     ).toBe("You revoked a consent.")
-  })
-})
-
-describe("query string parsing", () => {
-  it("accepts only known action filters", () => {
-    expect(parseAuditActionFilter("consent_revoked")).toBe("consent_revoked")
-    expect(parseAuditActionFilter("nope")).toBeUndefined()
-    expect(parseAuditActionFilter(undefined)).toBeUndefined()
-  })
-
-  it.each([
-    ["3", 3],
-    ["0", 1],
-    ["-2", 1],
-    ["abc", 1],
-    [undefined, 1],
-  ])("reads page %j as %j", (value, expected) => {
-    expect(parsePageNumber(value)).toBe(expected)
-  })
-
-  it("has a label for every action", () => {
-    expect(auditActionLabel("lab_results_read")).toBe("Lab results viewed")
   })
 })

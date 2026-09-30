@@ -3,8 +3,8 @@
 import { redirect } from "next/navigation"
 import { z } from "zod"
 
-import { homePathFor } from "@/core/auth/auth.rules"
 import { authenticateDemoAccount } from "@/features/auth/demo-accounts"
+import { homePathFor } from "@/features/auth/navigation"
 import {
   clearSession,
   isDemoAuthEnabled,

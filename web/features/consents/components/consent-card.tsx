@@ -7,14 +7,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { canRevoke, describeConsent } from "@/core/consents/consents.rules"
+import { canRevoke } from "@/core/consents/consents.rules"
 import type { Consent } from "@/core/consents/consents.types"
-import {
-  categoryLabel,
-  sortCategories,
-} from "@/core/lab-results/lab-results.rules"
 import { revokeConsentAction } from "@/features/consents/actions"
 import { RevokeConsentDialog } from "@/features/consents/components/revoke-consent-dialog"
+import { describeConsent } from "@/features/consents/view"
+import { humanize } from "@/lib/format"
 
 export function ConsentCard({ consent }: { consent: Consent }) {
   return (
@@ -25,9 +23,9 @@ export function ConsentCard({ consent }: { consent: Consent }) {
       </CardHeader>
       <CardContent className="flex flex-col gap-3 text-sm">
         <div className="flex flex-wrap gap-2">
-          {sortCategories(consent.categories).map((category) => (
+          {consent.categories.map((category) => (
             <Badge key={category} variant="secondary">
-              {categoryLabel(category)}
+              {humanize(category)}
             </Badge>
           ))}
         </div>

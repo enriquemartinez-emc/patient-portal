@@ -8,10 +8,10 @@ import {
   expiryInstant,
   isValidExpiryDate,
 } from "@/core/consents/consents.rules"
-import type { ConsentFormError } from "@/core/consents/consents.rules"
 import { LAB_CATEGORIES } from "@/core/lab-results/lab-results.types"
 import { requireSession } from "@/features/auth/session"
 import { grantConsent, revokeConsent } from "@/features/consents/repository"
+import type { ConsentFormError } from "@/features/consents/view"
 import { ApiError } from "@/lib/api/server"
 
 const CONSENTS_PATH = "/patient/consents"

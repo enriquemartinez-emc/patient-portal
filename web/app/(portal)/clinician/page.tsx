@@ -1,8 +1,8 @@
 import { PaginationNav } from "@/components/pagination-nav"
-import { parsePageNumber } from "@/core/audit/audit.rules"
 import { requireSessionPage } from "@/features/auth/session"
 import { PatientsTable } from "@/features/patients/components/patients-table"
 import { listMyPatients } from "@/features/patients/repository"
+import { parsePageNumber } from "@/lib/query"
 
 export const metadata = { title: "Patients · Patient Portal" }
 
