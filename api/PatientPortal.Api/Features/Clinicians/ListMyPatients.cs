@@ -37,7 +37,13 @@ public static class ListMyPatientsEndpoint
     {
         await using var connection = await dataSource.OpenConnectionAsync(ct);
 
-        var organizationId = await OrganizationLookup.OfClinicianAsync(connection, clinicianId, ct);
+        var organizationId = await connection.QuerySingleAsync<Guid>(
+            new CommandDefinition(
+                "select organization_id from clinicians where id = @clinicianId",
+                new { clinicianId },
+                cancellationToken: ct
+            )
+        );
 
         const string sql = """
             with candidates as (

@@ -53,6 +53,7 @@ public static class AuthorizationSetup
         });
 
         services.AddSingleton<IAuthorizationHandler, ActingAsHandler>();
+        services.AddSingleton<IAuthorizationHandler, PatientRecordAccessHandler>();
 
         return services;
     }

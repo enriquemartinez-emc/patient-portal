@@ -1,7 +1,9 @@
+using System.Security.Claims;
 using Dapper;
+using Microsoft.AspNetCore.Authorization;
 using Npgsql;
-using PatientPortal.Api.Common;
-using PatientPortal.Api.Features.Consents;
+using PatientPortal.Api.Infrastructure.Auditing;
+using PatientPortal.Api.Infrastructure.Auth;
 using PatientPortal.Core.Domain;
 
 namespace PatientPortal.Api.Features.LabResults;
@@ -26,16 +28,20 @@ internal static class PatientRecordReader
 {
     public static Task<PatientRecordRead> ReadAsClinicianAsync(
         NpgsqlConnection connection,
+        ClaimsPrincipal user,
+        IAuthorizationService authorization,
         Guid clinicianId,
-        Guid organizationId,
         Guid patientId,
         TimeProvider time,
         CancellationToken ct
     ) =>
         ReadAsync(
             connection,
+            user,
+            authorization,
+            ActorKind.Clinician,
             new ClinicianActor(new ClinicianId(clinicianId)),
-            organizationId,
+            clinicianId,
             patientId,
             time,
             ct
@@ -43,16 +49,20 @@ internal static class PatientRecordReader
 
     public static Task<PatientRecordRead> ReadAsResearcherAsync(
         NpgsqlConnection connection,
+        ClaimsPrincipal user,
+        IAuthorizationService authorization,
         Guid researcherId,
-        Guid organizationId,
         Guid patientId,
         TimeProvider time,
         CancellationToken ct
     ) =>
         ReadAsync(
             connection,
+            user,
+            authorization,
+            ActorKind.Researcher,
             new ResearcherActor(new ResearcherId(researcherId)),
-            organizationId,
+            researcherId,
             patientId,
             time,
             ct
@@ -60,29 +70,38 @@ internal static class PatientRecordReader
 
     private static async Task<PatientRecordRead> ReadAsync(
         NpgsqlConnection connection,
+        ClaimsPrincipal user,
+        IAuthorizationService authorization,
+        ActorKind kind,
         AuditActor actor,
-        Guid organizationId,
+        Guid actorId,
         Guid patientId,
         TimeProvider time,
         CancellationToken ct
     )
     {
-        var now = time.GetUtcNow();
         var patient = new PatientId(patientId);
 
         await using var transaction = await connection.BeginTransactionAsync(ct);
 
-        var basis = await LoadAccessBasisAsync(
+        var organizationId = await OrganizationOfAsync(connection, transaction, kind, actorId, ct);
+
+        var request = new PatientRecordRequest(
+            kind,
+            organizationId,
+            actorId,
+            patientId,
             connection,
             transaction,
-            actor,
-            organizationId,
-            patientId,
-            now,
             ct
         );
+        var decision = await authorization.AuthorizeAsync(
+            user,
+            request,
+            PatientRecordAccessRequirement.Instance
+        );
 
-        if (RecordAccessRules.Decide(basis) is not AccessGranted granted)
+        if (!decision.Succeeded)
         {
             // Ends the read, releasing its locks, then records the refusal on its own so that it is
             // kept even though the read is not.
@@ -92,7 +111,7 @@ internal static class PatientRecordReader
                 transaction: null,
                 AuditEntries.ForAccessDenied(
                     new AuditLogEntryId(Guid.CreateVersion7()),
-                    now,
+                    time.GetUtcNow(),
                     actor,
                     patient
                 ),
@@ -105,13 +124,13 @@ internal static class PatientRecordReader
             connection,
             transaction,
             patientId,
-            granted.Categories,
+            request.VisibleCategories,
             ct
         );
 
         var audit = AuditEntries.ForLabResultsRead(
             new AuditLogEntryId(Guid.CreateVersion7()),
-            now,
+            time.GetUtcNow(),
             actor,
             patient,
             [.. rows.Select(row => row.ToLabResult(patient))]
@@ -122,63 +141,24 @@ internal static class PatientRecordReader
         return new RecordReadGranted(rows);
     }
 
-    // A treating clinician needs no consent, so the consents are only loaded (and locked) for
-    // everyone else.
-    private static async Task<RecordAccessBasis> LoadAccessBasisAsync(
+    // The caller has already been checked to be this clinician or researcher, so the record exists.
+    private static Task<Guid> OrganizationOfAsync(
         NpgsqlConnection connection,
         NpgsqlTransaction transaction,
-        AuditActor actor,
-        Guid organizationId,
-        Guid patientId,
-        DateTimeOffset now,
+        ActorKind kind,
+        Guid actorId,
         CancellationToken ct
     )
     {
-        if (
-            actor is ClinicianActor clinician
-            && await IsTreatingAsync(
-                connection,
-                transaction,
-                clinician.Clinician.Value,
-                patientId,
-                ct
-            )
-        )
+        var sql = kind switch
         {
-            return new TreatingClinician();
-        }
+            ActorKind.Clinician => "select organization_id from clinicians where id = @actorId",
+            ActorKind.Researcher => "select organization_id from researchers where id = @actorId",
+            _ => throw new InvalidOperationException($"Unsupported actor '{kind}'."),
+        };
 
-        return new ConsentsToOrganization(
-            await ConsentCoverage.LoadGrantsAsync(
-                connection,
-                transaction,
-                patientId,
-                organizationId,
-                now,
-                ct
-            )
+        return connection.QuerySingleAsync<Guid>(
+            new CommandDefinition(sql, new { actorId }, transaction, cancellationToken: ct)
         );
     }
-
-    // FOR SHARE keeps a concurrent "end treatment" from committing mid-read.
-    private static async Task<bool> IsTreatingAsync(
-        NpgsqlConnection connection,
-        NpgsqlTransaction transaction,
-        Guid clinicianId,
-        Guid patientId,
-        CancellationToken ct
-    ) =>
-        await connection.QuerySingleOrDefaultAsync<Guid?>(
-            new CommandDefinition(
-                """
-                select id from treatment_relationships
-                where patient_id = @patientId and clinician_id = @clinicianId and ended_at is null
-                for share
-                """,
-                new { patientId, clinicianId },
-                transaction,
-                cancellationToken: ct
-            )
-        )
-            is not null;
 }

@@ -1,6 +1,7 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Npgsql;
-using PatientPortal.Api.Common;
 using PatientPortal.Api.Features.LabResults;
 
 namespace PatientPortal.Api.Features.Clinicians;
@@ -16,18 +17,20 @@ public static class ReadClinicianPatientLabResultsEndpoint
     private static async Task<Results<Ok<ListLabResultsResponse>, ProblemHttpResult>> Handle(
         Guid clinicianId,
         Guid patientId,
+        ClaimsPrincipal user,
+        IAuthorizationService authorization,
         NpgsqlDataSource dataSource,
         TimeProvider time,
         CancellationToken ct
     )
     {
         await using var connection = await dataSource.OpenConnectionAsync(ct);
-        var organizationId = await OrganizationLookup.OfClinicianAsync(connection, clinicianId, ct);
 
         var read = await PatientRecordReader.ReadAsClinicianAsync(
             connection,
+            user,
+            authorization,
             clinicianId,
-            organizationId,
             patientId,
             time,
             ct

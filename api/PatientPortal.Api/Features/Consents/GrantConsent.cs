@@ -3,6 +3,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Npgsql;
 using PatientPortal.Api.Common;
+using PatientPortal.Api.Infrastructure.Auditing;
 using PatientPortal.Core.Domain;
 
 namespace PatientPortal.Api.Features.Consents;

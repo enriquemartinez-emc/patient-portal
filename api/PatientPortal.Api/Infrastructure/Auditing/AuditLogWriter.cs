@@ -2,7 +2,7 @@ using Dapper;
 using Npgsql;
 using PatientPortal.Core.Domain;
 
-namespace PatientPortal.Api.Common;
+namespace PatientPortal.Api.Infrastructure.Auditing;
 
 // Every audited action inserts through here, on the caller's transaction, so the audit row
 // commits or rolls back together with the change or read it describes.
