@@ -16,6 +16,10 @@ const fontMono = Geist_Mono({
   variable: "--font-mono",
 })
 
+// Runs before first paint so the page never flashes the wrong theme. It lives here, in a server
+// component, because React warns about script tags rendered by client components.
+const themeScript = `try{var t=localStorage.getItem("theme");document.documentElement.classList.toggle("dark",t==="dark"||(t!=="light"&&matchMedia("(prefers-color-scheme: dark)").matches))}catch(e){}`
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -32,6 +36,9 @@ export default function RootLayout({
         manrope.variable
       )}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body>
         <ThemeProvider>{children}</ThemeProvider>
       </body>

@@ -2,7 +2,7 @@
 
 import { LogOut, Monitor, Moon, Settings, Sun } from "lucide-react"
 import Link from "next/link"
-import { useTheme } from "next-themes"
+import { useTheme, type Theme } from "@/components/theme-provider"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -67,8 +67,8 @@ export function UserMenu({
         <DropdownMenuGroup>
           <DropdownMenuLabel>Theme</DropdownMenuLabel>
           <DropdownMenuRadioGroup
-            value={theme ?? "system"}
-            onValueChange={(value) => setTheme(String(value))}
+            value={theme}
+            onValueChange={(value) => setTheme(value as Theme)}
           >
             <DropdownMenuRadioItem value="light">
               <Sun /> Light
