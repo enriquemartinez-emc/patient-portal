@@ -37,19 +37,21 @@ public sealed class ActingAsHandler(NpgsqlDataSource dataSource)
             return;
         }
 
-        // The table name comes from this fixed switch, never from the request.
-        var table = requirement.Kind switch
+        var sql = requirement.Kind switch
         {
-            ActorKind.Patient => "patients",
-            ActorKind.Clinician => "clinicians",
-            ActorKind.Researcher => "researchers",
+            ActorKind.Patient =>
+                "select exists (select 1 from patients where id = @personId and external_subject_id = @subject)",
+            ActorKind.Clinician =>
+                "select exists (select 1 from clinicians where id = @personId and external_subject_id = @subject)",
+            ActorKind.Researcher =>
+                "select exists (select 1 from researchers where id = @personId and external_subject_id = @subject)",
             _ => throw new InvalidOperationException($"Unsupported actor '{requirement.Kind}'."),
         };
 
         await using var connection = await dataSource.OpenConnectionAsync(http.RequestAborted);
         var matches = await connection.ExecuteScalarAsync<bool>(
             new CommandDefinition(
-                $"select exists (select 1 from {table} where id = @personId and external_subject_id = @subject)",
+                sql,
                 new { personId, subject },
                 cancellationToken: http.RequestAborted
             )

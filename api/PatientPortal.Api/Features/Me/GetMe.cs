@@ -29,11 +29,20 @@ public static class GetMeEndpoint
         await using var connection = await dataSource.OpenConnectionAsync(ct);
         var matches = new List<MeResponse>();
         foreach (
-            var (role, table) in new[]
+            var (role, sql) in new[]
             {
-                ("patient", "patients"),
-                ("clinician", "clinicians"),
-                ("researcher", "researchers"),
+                (
+                    "patient",
+                    "select id as Id, full_name as Name from patients where external_subject_id = @subject"
+                ),
+                (
+                    "clinician",
+                    "select id as Id, full_name as Name from clinicians where external_subject_id = @subject"
+                ),
+                (
+                    "researcher",
+                    "select id as Id, full_name as Name from researchers where external_subject_id = @subject"
+                ),
             }
         )
         {
@@ -42,13 +51,8 @@ public static class GetMeEndpoint
                 continue;
             }
 
-            // The table name comes from the fixed list above, never from the request.
             var person = await connection.QuerySingleOrDefaultAsync<DbPersonRow>(
-                new CommandDefinition(
-                    $"select id as Id, full_name as Name from {table} where external_subject_id = @subject",
-                    new { subject },
-                    cancellationToken: ct
-                )
+                new CommandDefinition(sql, new { subject }, cancellationToken: ct)
             );
             if (person is not null)
             {

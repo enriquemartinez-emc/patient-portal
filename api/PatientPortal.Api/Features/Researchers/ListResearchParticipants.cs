@@ -36,12 +36,10 @@ public static class ListResearchParticipantsEndpoint
     {
         await using var connection = await dataSource.OpenConnectionAsync(ct);
 
-        var organizationId = await connection.QuerySingleAsync<Guid>(
-            new CommandDefinition(
-                "select organization_id from researchers where id = @researcherId",
-                new { researcherId },
-                cancellationToken: ct
-            )
+        var organizationId = await OrganizationLookup.OfResearcherAsync(
+            connection,
+            researcherId,
+            ct
         );
 
         const string sql = """

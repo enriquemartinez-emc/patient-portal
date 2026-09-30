@@ -1,12 +1,7 @@
-using System.Security.Claims;
-using Dapper;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Npgsql;
 using PatientPortal.Api.Common;
 using PatientPortal.Api.Features.LabResults;
-using PatientPortal.Api.Infrastructure.Auth;
-using PatientPortal.Core.Domain;
 
 namespace PatientPortal.Api.Features.Researchers;
 
@@ -17,79 +12,42 @@ public static class ReadResearcherPatientLabResultsEndpoint
             .WithName("ResearcherReadPatientLabResults");
 
     // Researchers never have a treatment relationship: they see only the categories the patient's
-    // consents to the researcher's organization cover (data minimization). Reads and refusals are
-    // both recorded in the patient's audit trail.
+    // consents to the researcher's organization cover (data minimization). The audited read itself
+    // is shared with the clinician endpoint.
     private static async Task<Results<Ok<ListLabResultsResponse>, ProblemHttpResult>> Handle(
         Guid researcherId,
         Guid patientId,
-        ClaimsPrincipal user,
-        IAuthorizationService authorization,
         NpgsqlDataSource dataSource,
         TimeProvider time,
         CancellationToken ct
     )
     {
         await using var connection = await dataSource.OpenConnectionAsync(ct);
-        await using var transaction = await connection.BeginTransactionAsync(ct);
-
-        var organizationId = await connection.QuerySingleAsync<Guid>(
-            new CommandDefinition(
-                "select organization_id from researchers where id = @researcherId",
-                new { researcherId },
-                transaction,
-                cancellationToken: ct
-            )
-        );
-
-        var request = new PatientRecordRequest(
-            ActorKind.Researcher,
-            organizationId,
+        var organizationId = await OrganizationLookup.OfResearcherAsync(
+            connection,
             researcherId,
-            patientId,
-            connection,
-            transaction,
             ct
         );
-        var decision = await authorization.AuthorizeAsync(
-            user,
-            request,
-            PatientRecordAccessRequirement.Instance
+
+        var read = await PatientRecordReader.ReadAsResearcherAsync(
+            connection,
+            researcherId,
+            organizationId,
+            patientId,
+            time,
+            ct
         );
-        var actor = new ResearcherActor(new ResearcherId(researcherId));
-        if (!decision.Succeeded)
+
+        return read switch
         {
-            return await AccessDenial.RefuseAsync(
-                connection,
-                transaction,
-                actor,
-                patientId,
-                time,
-                ct
-            );
-        }
-
-        var rows = await LabResultsQuery.InCategoriesAsync(
-            connection,
-            transaction,
-            patientId,
-            request.VisibleCategories,
-            ct
-        );
-
-        var patient = new PatientId(patientId);
-        var audit = AuditEntries.ForLabResultsRead(
-            new AuditLogEntryId(Guid.CreateVersion7()),
-            time.GetUtcNow(),
-            actor,
-            patient,
-            [.. rows.Select(row => row.ToLabResult(patient))]
-        );
-        await AuditLogWriter.InsertAsync(connection, transaction, audit, ct);
-
-        await transaction.CommitAsync(ct);
-
-        return TypedResults.Ok(
-            new ListLabResultsResponse([.. rows.Select(row => row.ToResponse())])
-        );
+            RecordReadGranted granted => TypedResults.Ok(
+                new ListLabResultsResponse([.. granted.Results.Select(row => row.ToResponse())])
+            ),
+            _ => TypedResults.Problem(
+                statusCode: StatusCodes.Status403Forbidden,
+                title: "Access denied.",
+                detail: "You are not allowed to view this patient's records."
+            ),
+        };
     }
 }

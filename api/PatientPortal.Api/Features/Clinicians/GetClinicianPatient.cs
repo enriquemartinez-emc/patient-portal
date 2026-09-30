@@ -1,6 +1,7 @@
 using Dapper;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Npgsql;
+using PatientPortal.Api.Common;
 
 namespace PatientPortal.Api.Features.Clinicians;
 
@@ -22,13 +23,7 @@ public static class GetClinicianPatientEndpoint
     {
         await using var connection = await dataSource.OpenConnectionAsync(ct);
 
-        var organizationId = await connection.QuerySingleAsync<Guid>(
-            new CommandDefinition(
-                "select organization_id from clinicians where id = @clinicianId",
-                new { clinicianId },
-                cancellationToken: ct
-            )
-        );
+        var organizationId = await OrganizationLookup.OfClinicianAsync(connection, clinicianId, ct);
 
         const string sql = """
             select p.id as Id, p.full_name as FullName, p.date_of_birth as DateOfBirth,
