@@ -1,11 +1,17 @@
 "use client"
 
-import { LogOut, Monitor, Moon, Settings, Sun } from "lucide-react"
+import {
+  ChevronsUpDown,
+  LogOut,
+  Monitor,
+  Moon,
+  Settings,
+  Sun,
+} from "lucide-react"
 import Link from "next/link"
 import { useTheme } from "next-themes"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +23,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar"
 
 // "Dr. Sarah Thompson" -> "ST": first and last name, skipping titles such as "Dr.".
 function initials(name: string): string {
@@ -36,25 +43,36 @@ export function UserMenu({
   signOutAction: () => Promise<void>
 }) {
   const { theme, setTheme } = useTheme()
+  const { isMobile } = useSidebar()
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <Button
-            variant="ghost"
-            className="h-9 gap-2 px-2"
+          <SidebarMenuButton
+            size="lg"
+            className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             aria-label="Account menu"
           />
         }
       >
-        <Avatar size="sm">
+        <Avatar className="size-8">
           <AvatarFallback>{initials(name)}</AvatarFallback>
         </Avatar>
-        <span className="hidden text-sm sm:inline">{name}</span>
+        <div className="grid flex-1 text-left text-sm leading-tight">
+          <span className="truncate font-medium">{name}</span>
+          <span className="truncate text-xs text-muted-foreground capitalize">
+            {role}
+          </span>
+        </div>
+        <ChevronsUpDown className="ml-auto size-4" />
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="w-56">
+      <DropdownMenuContent
+        side={isMobile ? "bottom" : "right"}
+        align="end"
+        className="w-56"
+      >
         <DropdownMenuGroup>
           <DropdownMenuLabel className="flex flex-col gap-0.5">
             <span className="text-sm font-medium text-foreground">{name}</span>
@@ -91,6 +109,7 @@ export function UserMenu({
           {/* Stays open on click so the form submits before the menu unmounts. */}
           <DropdownMenuItem
             closeOnClick={false}
+            nativeButton
             render={<button type="submit" className="w-full" />}
           >
             <LogOut /> Log out

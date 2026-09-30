@@ -65,17 +65,23 @@ test.describe("on a phone", () => {
     await signIn(page, "emily.carter@demo.example")
     await page.goto("/patient/consents")
 
-    await expect(
-      page.getByRole("link", { name: "Access history" })
-    ).toBeVisible()
-    await expect(
-      page.getByRole("button", { name: "Account menu" })
-    ).toBeVisible()
+    // Check no horizontal scroll with the sidebar closed
     const scrollsSideways = await page.evaluate(
       () =>
         document.documentElement.scrollWidth >
         document.documentElement.clientWidth
     )
     expect(scrollsSideways).toBe(false)
+
+    // Open the sidebar sheet
+    await page.getByRole("button", { name: "Toggle Sidebar" }).click()
+
+    // Check that navigation links and account menu are visible
+    await expect(
+      page.getByRole("link", { name: "Access history" })
+    ).toBeVisible()
+    await expect(
+      page.getByRole("button", { name: "Account menu" })
+    ).toBeVisible()
   })
 })
