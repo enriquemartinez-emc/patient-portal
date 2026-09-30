@@ -36,20 +36,20 @@ below (the sign-in page lists them too). They all use the password `demo-passwor
 Use a private window for the second person: Keycloak keeps one sign-in per browser, so signing in as someone else in the
 same window replaces the first.
 
-1. **As Emily**: the dashboard summarises her results, who can see them and who has opened them. *Lab results* lists
+1. **As Emily**: the dashboard summarises her results, who can see them and who has opened them. _Lab results_ lists
    them by kind of test; select a test to open it.
-2. **Consents** (still as Emily): under *Share your results*, choose *Meridian Research Institute*, tick *Lipids*, give a
-   reason, and optionally set a date to stop sharing. Select **Share results**. It appears under *Active*.
-3. **As Laura** (private window): *Participants* now has a second anonymous participant with only *Lipids*. That is
-   Emily; the other, *Participant 00000002*, is James. Open her to see just those results. Names are never shown to
+2. **Consents** (still as Emily): under _Share your results_, choose _Meridian Research Institute_, tick _Lipids_, give a
+   reason, and optionally set a date to stop sharing. Select **Share results**. It appears under _Active_.
+3. **As Laura** (private window): _Participants_ now has a second anonymous participant with only _Lipids_. That is
+   Emily; the other, _Participant 00000002_, is James. Open her to see just those results. Names are never shown to
    researchers.
-4. **As Sarah**: *Patients* shows Emily with "You treat this patient". Open her: all four categories are there, with
+4. **As Sarah**: _Patients_ shows Emily with "You treat this patient". Open her: all four categories are there, with
    a notice that the access is recorded.
-5. **Back as Emily**: *Access history* now shows "Dr. Sarah Thompson (Northside Clinic) viewed 4 lab results" and Laura's
-   view. Use the *Show* filter to narrow it by type.
-6. **As Michael**: Emily appears as "Shared with your organization". Open her: only *Hematology* and *Lipids*,
+5. **Back as Emily**: _Access history_ now shows "Dr. Sarah Thompson (Northside Clinic) viewed 4 lab results" and Laura's
+   view. Use the _Show_ filter to narrow it by type.
+6. **As Michael**: Emily appears as "Shared with your organization". Open her: only _Hematology_ and _Lipids_,
    because that is all she shared with his clinic.
-7. **Revoke** (as Emily): on *Consents*, select **Revoke access** on the Meridian consent and confirm. Laura loses access
+7. **Revoke** (as Emily): on _Consents_, select **Revoke access** on the Meridian consent and confirm. Laura loses access
    at once, and the revoke is in Emily's access history.
 
 `admin@demo.example` signs in but has no patient, clinician or researcher record, so it sees a "no portal access" page.
@@ -64,25 +64,23 @@ database with the demo data and re-imports the Keycloak realm. `docker compose d
 
 ## Develop
 
-Run the dependencies in Docker and the two apps on your machine. Changes show up as you save, and you can debug from
-your IDE.
+Postgres and Keycloak run in Docker, and the API and web app run on your machine. Changes show up as you save, and you
+can debug from your IDE. One command starts all of it:
 
 ```sh
-cp .env.example .env
-cp web/.env.example web/.env.local
-docker compose up -d --wait postgres keycloak migrations    # database, sign-in server, schema and demo data
-
-cd api && dotnet watch run --project PatientPortal.Api      # http://localhost:5246, reloads on save
-cd web && pnpm install && pnpm dev                          # http://localhost:3000, hot reload on save
+./dev.sh          # start everything, Ctrl+C stops the API and web app
+./dev.sh down     # also stop Postgres and Keycloak
+./dev.sh reset    # stop everything and delete the database
 ```
 
-- Open <http://localhost:3000> and sign in as usual. The API's local settings are in
-  `api/PatientPortal.Api/appsettings.Development.json` and the web app's are in `web/.env.local`. Both hold the same
-  development-only values as `.env.example`, so change them together.
-- To debug, start the API from your IDE with the `http` launch profile instead of `dotnet watch`, and run `pnpm dev`
-  under your IDE's Node debugger.
-- Stop the containerised web app and API first (`docker compose stop web api`): they use the same ports.
-- After adding a migration, apply it with `docker compose up migrations`.
+It needs Docker, the .NET SDK and pnpm. On the first run it creates `.env` and `web/.env.local` from the examples,
+installs the web dependencies, and applies the migrations. Then open <http://localhost:3000> and sign in as usual.
+
+- The API's local settings are in `api/PatientPortal.Api/appsettings.Development.json` and the web app's are in
+  `web/.env.local`. Both hold the same development-only values as `.env.example`, so change them together.
+- To debug, start the API from your IDE with the `http` launch profile and run `pnpm dev` under your IDE's Node
+  debugger. `./dev.sh` re-runs the migrations each time, so it also picks up a new migration.
+- `./dev.sh` stops the containerised web app and API if they are running, because they use the same ports.
 
 ## How it fits together
 

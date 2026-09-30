@@ -81,4 +81,3 @@ docker-compose.yml
 
 - Never include AI attribution, co-authorship tags, or session links in git commits.
 - Keep commit messages concise, descriptive, and strictly attributed to the local git author.
-- Use conventional commits always.
