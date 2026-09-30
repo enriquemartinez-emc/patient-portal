@@ -19,6 +19,8 @@ for tool in docker dotnet pnpm; do
   command -v "$tool" >/dev/null || { echo "$tool is required but was not found." >&2; exit 1; }
 done
 
+docker info >/dev/null 2>&1 || { echo "Docker is not running. Start Docker Desktop (or the docker service) and run ./dev.sh again." >&2; exit 1; }
+
 [ -f .env ] || { cp .env.example .env; echo "Created .env from .env.example"; }
 [ -f web/.env.local ] || { cp web/.env.example web/.env.local; echo "Created web/.env.local from web/.env.example"; }
 
