@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test"
 
-import { signIn } from "./support"
+import { logOut, signIn } from "./support"
 
 test.describe("access", () => {
   test("signed-out visitors are sent to sign in", async ({ page }) => {
@@ -27,7 +27,7 @@ test.describe("access", () => {
     await expect(
       page.getByText("This account has no portal access")
     ).toBeVisible()
-    await page.getByRole("button", { name: "Sign out" }).click()
+    await page.getByRole("button", { name: "Log out" }).click()
 
     await expect(page.getByRole("button", { name: "Sign in" })).toBeVisible()
   })
@@ -46,7 +46,7 @@ test.describe("access", () => {
     await signIn(page, "emily.carter@demo.example")
     await expect(page).toHaveURL("/patient")
 
-    await page.getByRole("button", { name: "Sign out" }).click()
+    await logOut(page)
     await expect(page).toHaveURL("/login")
 
     await page.goto("/patient")
@@ -67,6 +67,9 @@ test.describe("on a phone", () => {
 
     await expect(
       page.getByRole("link", { name: "Access history" })
+    ).toBeVisible()
+    await expect(
+      page.getByRole("button", { name: "Account menu" })
     ).toBeVisible()
     const scrollsSideways = await page.evaluate(
       () =>

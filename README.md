@@ -36,7 +36,8 @@ below (the sign-in page lists them too). They all use the password `demo-passwor
 Use a private window for the second person: Keycloak keeps one sign-in per browser, so signing in as someone else in the
 same window replaces the first.
 
-1. **As Emily**: the home page lists her lab results by category. Select a test to open it.
+1. **As Emily**: the dashboard summarises her results, who can see them and who has opened them. *Lab results* lists
+   them by kind of test; select a test to open it.
 2. **Consents** (still as Emily): under *Share your results*, choose *Meridian Research Institute*, tick *Lipids*, give a
    reason, and optionally set a date to stop sharing. Select **Share results**. It appears under *Active*.
 3. **As Laura** (private window): *Participants* now has a second anonymous participant with only *Lipids*. That is
@@ -53,6 +54,8 @@ same window replaces the first.
 
 `admin@demo.example` signs in but has no patient, clinician or researcher record, so it sees a "no portal access" page.
 It exists for managing treatment relationships through the API.
+
+The menu at the top right switches the theme (light, dark or system), opens Settings (empty for now) and logs out.
 
 ### Starting over
 

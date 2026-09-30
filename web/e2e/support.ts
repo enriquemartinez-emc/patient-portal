@@ -15,6 +15,15 @@ export async function signIn(
   await page.locator("#kc-login").click()
 }
 
+export async function openAccountMenu(page: Page) {
+  await page.getByRole("button", { name: "Account menu" }).click()
+}
+
+export async function logOut(page: Page) {
+  await openAccountMenu(page)
+  await page.getByRole("menuitem", { name: "Log out" }).click()
+}
+
 // A second signed-in person in their own browser context, for tests where one person's action is
 // checked from another's screen. The context is closed when the callback returns.
 export async function asPerson<T>(

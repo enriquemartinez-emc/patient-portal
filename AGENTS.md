@@ -75,6 +75,7 @@ docker-compose.yml
 - After frontend changes, run prettier.
 - Use Conventional Commits for completed changes.
 - Use playwright cli skill only when approved.
+- Run e2e (Playwright) tests only when the user commands it.
 - Never read, modify or do any type of manipulation of confidential information like secret or private keys.
 - Format Nextjs .ts/tsx files after every change.
 

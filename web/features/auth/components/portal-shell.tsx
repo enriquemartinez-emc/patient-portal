@@ -1,10 +1,10 @@
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
-import type { Session } from "@/features/auth/types"
+import Link from "next/link"
+
 import { signOutAction } from "@/features/auth/actions"
 import { MainNav } from "@/features/auth/components/main-nav"
+import { UserMenu } from "@/features/auth/components/user-menu"
 import { navigation } from "@/features/auth/navigation"
+import type { Session } from "@/features/auth/types"
 
 export function PortalShell({
   session,
@@ -22,24 +22,21 @@ export function PortalShell({
         Skip to content
       </a>
       <header className="border-b">
-        <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center gap-x-6 gap-y-3 px-6 py-3">
-          <span className="font-semibold">Patient Portal</span>
-          <MainNav items={navigation[session.kind]} />
-          <div className="ml-auto flex items-center gap-3 text-sm sm:ml-0">
-            <Badge variant="secondary" className="capitalize">
-              {session.kind}
-            </Badge>
-            <span>{session.name}</span>
-            <Separator orientation="vertical" className="h-5" />
-            <form action={signOutAction}>
-              <Button type="submit" variant="ghost" size="sm">
-                Sign out
-              </Button>
-            </form>
+        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-6 py-3">
+          <Link href={`/${session.kind}`} className="font-semibold">
+            Patient Portal
+          </Link>
+          <div className="ml-auto sm:order-last">
+            <UserMenu
+              name={session.name}
+              role={session.kind}
+              signOutAction={signOutAction}
+            />
           </div>
+          <MainNav items={navigation[session.kind]} />
         </div>
       </header>
-      <main id="content" className="mx-auto w-full max-w-5xl flex-1 px-6 py-8">
+      <main id="content" className="mx-auto w-full max-w-6xl flex-1 px-6 py-8">
         {children}
       </main>
     </div>

@@ -42,7 +42,7 @@ export default async function LoginPage() {
             </span>
             <form action={signOutAction}>
               <Button type="submit" variant="outline" size="sm">
-                Sign out
+                Log out
               </Button>
             </form>
           </AlertDescription>
