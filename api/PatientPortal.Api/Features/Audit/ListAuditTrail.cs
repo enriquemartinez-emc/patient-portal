@@ -1,14 +1,34 @@
 using Dapper;
+using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Npgsql;
 using PatientPortal.Api.Common;
 
 namespace PatientPortal.Api.Features.Audit;
 
-public sealed record ListAuditTrailRequest(int Page = 1, int PageSize = PagingRules.DefaultPageSize)
-    : IPagedRequest;
+public sealed record ListAuditTrailRequest(
+    int Page = 1,
+    int PageSize = PagingRules.DefaultPageSize,
+    string? Action = null
+) : IPagedRequest;
 
-public sealed class ListAuditTrailValidator : PagedRequestValidator<ListAuditTrailRequest>;
+public sealed class ListAuditTrailValidator : PagedRequestValidator<ListAuditTrailRequest>
+{
+    private static readonly string[] Actions =
+    [
+        "lab_results_read",
+        "consent_granted",
+        "consent_revoked",
+    ];
+
+    public ListAuditTrailValidator()
+    {
+        RuleFor(x => x.Action)
+            .Must(action => Actions.Contains(action))
+            .When(x => x.Action is not null)
+            .WithMessage("The action filter must be one of: " + string.Join(", ", Actions) + ".");
+    }
+}
 
 public sealed record AuditEntryResponse(
     Guid Id,
@@ -56,6 +76,7 @@ public static class ListAuditTrailEndpoint
             left join researchers r on a.actor_kind = 'researcher' and r.id = a.actor_id
             left join organizations ro on ro.id = r.organization_id
             where a.patient_id = @patientId
+              and (@action::text is null or a.action = @action)
             order by a.occurred_at desc, a.id desc
             limit @limit offset @offset
             """;
@@ -66,6 +87,7 @@ public static class ListAuditTrailEndpoint
                 new
                 {
                     patientId,
+                    action = request.Action,
                     limit = Paging.FetchLimit(request),
                     offset = Paging.Offset(request),
                 },

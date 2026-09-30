@@ -7,6 +7,7 @@ public static class CliniciansEndpoints
         var group = app.MapGroup("/clinicians/{clinicianId:guid}").WithTags("Clinicians");
 
         group.MapListMyPatientsEndpoint();
+        group.MapGetClinicianPatientEndpoint();
         group.MapReadClinicianPatientLabResultsEndpoint();
 
         return app;

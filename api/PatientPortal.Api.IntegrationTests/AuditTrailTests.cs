@@ -215,4 +215,66 @@ public sealed class AuditTrailTests(PostgresFixture postgres) : IDisposable
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+
+    [Fact]
+    public async Task The_action_filter_returns_only_matching_entries_and_pages_them()
+    {
+        await using var owner = await postgres.OpenOwnerConnectionAsync();
+        var patient = await SchemaData.InsertPatientAsync(owner);
+        var clinic = await SchemaData.InsertOrganizationAsync(owner);
+        var clinician = await SchemaData.InsertClinicianAsync(owner, clinic);
+        await SchemaData.InsertAuditEntryAtAsync(
+            owner,
+            patient,
+            "clinician",
+            clinician,
+            _api.Time.Now.AddHours(-3)
+        );
+        await SchemaData.InsertAuditEntryAtAsync(
+            owner,
+            patient,
+            "clinician",
+            clinician,
+            _api.Time.Now.AddHours(-2)
+        );
+        var grant = await _api.Client.PostAsJsonAsync(
+            $"/patients/{patient}/consents",
+            new
+            {
+                granteeOrganizationId = clinic,
+                categories = new[] { "lipids" },
+                purpose = "Care",
+            }
+        );
+        var consent = (
+            await grant.Content.ReadFromJsonAsync<Features.Consents.ConsentResponse>()
+        )!.Id;
+        _api.Time.Now = _api.Time.Now.AddMinutes(5);
+        await _api.Client.DeleteAsync($"/patients/{patient}/consents/{consent}");
+
+        var reads = await GetPageAsync(patient, "?action=lab_results_read&pageSize=1");
+        var readsPage2 = await GetPageAsync(patient, "?action=lab_results_read&page=2&pageSize=1");
+        var revokes = await GetPageAsync(patient, "?action=consent_revoked");
+        var everything = await GetPageAsync(patient);
+
+        Assert.Equal(["lab_results_read"], reads.Items.Select(item => item.Action));
+        Assert.True(reads.HasNextPage);
+        Assert.Equal(["lab_results_read"], readsPage2.Items.Select(item => item.Action));
+        Assert.False(readsPage2.HasNextPage);
+        Assert.Equal(["consent_revoked"], revokes.Items.Select(item => item.Action));
+        Assert.Equal(4, everything.Items.Count);
+    }
+
+    [Fact]
+    public async Task An_unknown_action_filter_is_rejected()
+    {
+        await using var owner = await postgres.OpenOwnerConnectionAsync();
+        var patient = await SchemaData.InsertPatientAsync(owner);
+
+        var response = await _api.Client.GetAsync(
+            $"/patients/{patient}/audit?action=deleted_everything"
+        );
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
 }

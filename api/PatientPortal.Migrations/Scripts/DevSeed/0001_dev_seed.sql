@@ -5,23 +5,23 @@ INSERT INTO organizations (id, name, kind) VALUES
     ('a0000000-0000-0000-0000-000000000003', 'Meridian Research Institute', 'research_institution');
 
 INSERT INTO patients (id, full_name, date_of_birth) VALUES
-    ('b0000000-0000-0000-0000-000000000001', 'Alma Reyes', '1984-03-12'),
-    ('b0000000-0000-0000-0000-000000000002', 'Tomas Berg', '1971-11-02');
+    ('b0000000-0000-0000-0000-000000000001', 'Emily Carter', '1984-03-12'),
+    ('b0000000-0000-0000-0000-000000000002', 'James Wilson', '1971-11-02');
 
 INSERT INTO clinicians (id, organization_id, full_name) VALUES
-    ('c0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', 'Dr. Ines Okafor'),
-    ('c0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000002', 'Dr. Paul Lindqvist');
+    ('c0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', 'Dr. Sarah Thompson'),
+    ('c0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000002', 'Dr. Michael Brown');
 
 INSERT INTO researchers (id, organization_id, full_name) VALUES
-    ('d0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000003', 'Dr. Mei Tanaka');
+    ('d0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000003', 'Dr. Laura Davies');
 
--- Ines Okafor treats Alma; Paul Lindqvist treats Tomas; Ines used to treat Tomas.
+-- Sarah Thompson treats Emily; Michael Brown treats James; Sarah used to treat James.
 INSERT INTO treatment_relationships (id, patient_id, clinician_id, started_at, ended_at) VALUES
     ('f0000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000001', '2025-01-10T09:00:00Z', NULL),
     ('f0000000-0000-0000-0000-000000000002', 'b0000000-0000-0000-0000-000000000002', 'c0000000-0000-0000-0000-000000000002', '2025-03-05T09:00:00Z', NULL),
     ('f0000000-0000-0000-0000-000000000003', 'b0000000-0000-0000-0000-000000000002', 'c0000000-0000-0000-0000-000000000001', '2023-06-01T09:00:00Z', '2024-12-01T09:00:00Z');
 
--- Alma shares hematology and lipids with Riverside Clinic; Tomas shares biochemistry with the research institute.
+-- Emily shares hematology and lipids with Riverside Clinic; James shares biochemistry with the research institute.
 INSERT INTO consent_grants (id, patient_id, grantee_organization_id, categories, purpose, granted_at, expires_at, revoked_at) VALUES
     ('e0000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000002', ARRAY['hematology', 'lipids'], 'Second opinion on blood work', '2026-01-15T10:00:00Z', NULL, NULL),
     ('e0000000-0000-0000-0000-000000000002', 'b0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000003', ARRAY['biochemistry'], 'Metabolic health study', '2026-02-01T10:00:00Z', '2030-02-01T10:00:00Z', NULL);

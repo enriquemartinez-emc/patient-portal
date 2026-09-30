@@ -6,6 +6,7 @@ public static class ResearchersEndpoints
     {
         var group = app.MapGroup("/researchers/{researcherId:guid}").WithTags("Researchers");
 
+        group.MapListResearchParticipantsEndpoint();
         group.MapReadResearcherPatientLabResultsEndpoint();
 
         return app;
