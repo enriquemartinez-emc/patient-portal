@@ -518,3 +518,7 @@ web/.env*
 # typescript
 web/*.tsbuildinfo
 web/next-env.d.ts
+
+# Playwright
+web/test-results/
+web/playwright-report/

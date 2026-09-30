@@ -36,7 +36,7 @@ browser ──► web (Next.js BFF) ──► api (.NET minimal API) ──► p
 ```sh
 cd api && dotnet csharpier check . && dotnet test PatientPortal.slnx   # integration tests start Postgres with Testcontainers
 cd web && pnpm lint && pnpm typecheck && pnpm format:check && pnpm test && pnpm build
-python3 scripts/smoke.py                                              # against a running stack
+cd web && pnpm exec playwright install chromium && pnpm test:e2e   # browser journeys against a running stack
 ```
 
 CI (`.github/workflows/ci.yml`) runs the same three groups.
