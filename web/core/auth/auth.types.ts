@@ -24,4 +24,6 @@ export type SessionKind = Session["kind"]
 export type NavItem = {
   label: string
   href: string
+  // Deeper paths that still belong to this item (a detail page under a list, for example).
+  activeOn: readonly string[]
 }

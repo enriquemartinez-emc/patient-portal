@@ -85,3 +85,11 @@ export async function apiPost<T>(
 export async function apiDelete(path: string): Promise<void> {
   await send("DELETE", path)
 }
+
+export function isNotFound(error: unknown): boolean {
+  return error instanceof ApiError && error.status === 404
+}
+
+export function isForbidden(error: unknown): boolean {
+  return error instanceof ApiError && error.status === 403
+}

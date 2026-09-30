@@ -1,25 +1,30 @@
 import "server-only"
 
-import { z } from "zod"
-
 import type { LabResult } from "@/core/lab-results/lab-results.types"
-import { apiGet } from "@/lib/api/server"
-
-const labResultSchema = z.object({
-  id: z.guid(),
-  category: z.string(),
-  testName: z.string(),
-  value: z.number(),
-  unit: z.string(),
-  collectedAt: z.iso.datetime({ offset: true }),
-}) satisfies z.ZodType<LabResult>
-
-const labResultsSchema = z.object({ items: z.array(labResultSchema) })
+import { apiGet, isNotFound } from "@/lib/api/server"
+import { labResultSchema, labResultsResponseSchema } from "@/lib/api/schemas"
 
 export async function listLabResults(patientId: string): Promise<LabResult[]> {
   const { items } = await apiGet(
     `/patients/${patientId}/lab-results`,
-    labResultsSchema
+    labResultsResponseSchema
   )
   return items
+}
+
+export async function getLabResult(
+  patientId: string,
+  labResultId: string
+): Promise<LabResult | null> {
+  try {
+    return await apiGet(
+      `/patients/${patientId}/lab-results/${labResultId}`,
+      labResultSchema
+    )
+  } catch (error) {
+    if (isNotFound(error)) {
+      return null
+    }
+    throw error
+  }
 }

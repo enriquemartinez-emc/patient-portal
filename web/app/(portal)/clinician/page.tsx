@@ -1,47 +1,35 @@
-import { Badge } from "@/components/ui/badge"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { listMyPatients } from "@/features/patients/repository"
+import { PaginationNav } from "@/components/pagination-nav"
+import { parsePageNumber } from "@/core/audit/audit.rules"
 import { requireSessionPage } from "@/features/auth/session"
+import { PatientsTable } from "@/features/patients/components/patients-table"
+import { listMyPatients } from "@/features/patients/repository"
 
-export default async function ClinicianHomePage() {
+export const metadata = { title: "Patients · Patient Portal" }
+
+export default async function ClinicianPatientsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>
+}) {
   const session = await requireSessionPage("clinician")
-  const { items } = await listMyPatients(session.clinicianId)
+  const page = parsePageNumber((await searchParams).page)
+  const patients = await listMyPatients(session.clinicianId, page)
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold">Welcome, {session.name}</h1>
-      <Card>
-        <CardHeader>
-          <CardTitle>Your patients</CardTitle>
-          <CardDescription>
-            Patients you treat, or who have shared their records with your
-            organization.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ul className="flex flex-col gap-2">
-            {items.map((patient) => (
-              <li key={patient.id} className="flex items-center gap-3">
-                <span>{patient.fullName}</span>
-                {patient.accessBasis.map((basis) => (
-                  <Badge key={basis} variant="outline">
-                    {basis}
-                  </Badge>
-                ))}
-              </li>
-            ))}
-            {items.length === 0 && (
-              <li className="text-muted-foreground">No patients yet.</li>
-            )}
-          </ul>
-        </CardContent>
-      </Card>
+      <div>
+        <h1 className="text-2xl font-semibold">Your patients</h1>
+        <p className="text-sm text-muted-foreground">
+          Welcome, {session.name}. Patients you treat, or who have shared their
+          records with your organization.
+        </p>
+      </div>
+      <PatientsTable patients={patients.items} />
+      <PaginationNav
+        page={patients.page}
+        hasNextPage={patients.hasNextPage}
+        hrefFor={(target) => `/clinician?page=${target}`}
+      />
     </div>
   )
 }

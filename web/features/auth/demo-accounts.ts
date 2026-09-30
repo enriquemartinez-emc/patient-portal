@@ -16,43 +16,43 @@ export type DemoAccount = {
 
 export const demoAccounts: readonly DemoAccount[] = [
   {
-    email: "alma.reyes@demo.example",
+    email: "emily.carter@demo.example",
     session: {
       kind: "patient",
       patientId: "b0000000-0000-0000-0000-000000000001",
-      name: "Alma Reyes",
+      name: "Emily Carter",
     },
   },
   {
-    email: "tomas.berg@demo.example",
+    email: "james.wilson@demo.example",
     session: {
       kind: "patient",
       patientId: "b0000000-0000-0000-0000-000000000002",
-      name: "Tomas Berg",
+      name: "James Wilson",
     },
   },
   {
-    email: "ines.okafor@demo.example",
+    email: "sarah.thompson@demo.example",
     session: {
       kind: "clinician",
       clinicianId: "c0000000-0000-0000-0000-000000000001",
-      name: "Dr. Ines Okafor",
+      name: "Dr. Sarah Thompson",
     },
   },
   {
-    email: "paul.lindqvist@demo.example",
+    email: "michael.brown@demo.example",
     session: {
       kind: "clinician",
       clinicianId: "c0000000-0000-0000-0000-000000000002",
-      name: "Dr. Paul Lindqvist",
+      name: "Dr. Michael Brown",
     },
   },
   {
-    email: "mei.tanaka@demo.example",
+    email: "laura.davies@demo.example",
     session: {
       kind: "researcher",
       researcherId: "d0000000-0000-0000-0000-000000000001",
-      name: "Dr. Mei Tanaka",
+      name: "Dr. Laura Davies",
     },
   },
 ]

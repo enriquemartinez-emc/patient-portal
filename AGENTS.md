@@ -70,6 +70,8 @@ of the database, so `repository.ts` files call it instead of querying SQL.
 - `proxy.ts` — only redirects requests without a session cookie to `/login`.
   It is not an authorization check.
 - `components/ui/` — shared shadcn primitives.
+- Core rules are unit-tested with vitest (`pnpm test`, files next to the code as
+  `*.test.ts` under `core/`).
 - Until Keycloak and Better-Auth are added, sign-in uses demo accounts
   (`features/auth/demo-accounts.ts`, enabled by `ENABLE_DEMO_AUTH`).
 

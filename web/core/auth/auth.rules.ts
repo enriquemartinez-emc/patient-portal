@@ -26,7 +26,47 @@ export function personaLabel(kind: SessionKind): string {
   }
 }
 
-// Each persona's navigation. Feature pages add their entries here as they are built.
+// Each persona's navigation.
 export function navigationFor(session: Session): readonly NavItem[] {
-  return [{ label: "Overview", href: homePathFor(session) }]
+  switch (session.kind) {
+    case "patient":
+      return [
+        {
+          label: "Lab results",
+          href: "/patient",
+          activeOn: ["/patient/lab-results"],
+        },
+        { label: "Consents", href: "/patient/consents", activeOn: [] },
+        {
+          label: "Access history",
+          href: "/patient/access-history",
+          activeOn: [],
+        },
+      ]
+    case "clinician":
+      return [
+        {
+          label: "Patients",
+          href: "/clinician",
+          activeOn: ["/clinician/patients"],
+        },
+      ]
+    case "researcher":
+      return [
+        {
+          label: "Participants",
+          href: "/researcher",
+          activeOn: ["/researcher/participants"],
+        },
+      ]
+  }
+}
+
+// An item is current on its own path and on the deeper paths it lists, never on a sibling's.
+export function isCurrentPath(item: NavItem, pathname: string): boolean {
+  return [item.href, ...item.activeOn].some(
+    (path) =>
+      pathname === path ||
+      (path !== item.href && pathname.startsWith(`${path}/`))
+  )
 }
