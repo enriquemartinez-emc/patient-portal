@@ -7,8 +7,9 @@ if (string.IsNullOrWhiteSpace(connectionString))
     return 1;
 }
 
-// Optional: when unset, the application role keeps whatever password it already has.
+// Optional: when unset, a login role keeps whatever password it already has.
 var appRolePassword = Environment.GetEnvironmentVariable("APP_ROLE_PASSWORD");
+var webRolePassword = Environment.GetEnvironmentVariable("WEB_ROLE_PASSWORD");
 
 var includeDevSeed = string.Equals(
     Environment.GetEnvironmentVariable("MIGRATIONS_INCLUDE_DEV_SEED"),
@@ -16,7 +17,12 @@ var includeDevSeed = string.Equals(
     StringComparison.OrdinalIgnoreCase
 );
 
-var result = MigrationRunner.Run(connectionString, appRolePassword, includeDevSeed);
+var result = MigrationRunner.Run(
+    connectionString,
+    appRolePassword,
+    includeDevSeed,
+    webRolePassword
+);
 if (!result.Successful)
 {
     Console.Error.WriteLine(result.Error);

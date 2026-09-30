@@ -10,13 +10,13 @@ public static class MigrationRunner
     private const int SchemaRunGroup = 1;
     private const int DevSeedRunGroup = 2;
 
-    // Runs the versioned scripts, then (when a password is given) sets the application role's
-    // password. Migrations must use a direct, non-pooled connection: the password step relies
-    // on session state.
+    // Runs the versioned scripts, then sets the password of each login role that was given one.
+    // Migrations must use a direct, non-pooled connection: the password step relies on session state.
     public static DatabaseUpgradeResult Run(
         string connectionString,
         string? appRolePassword,
-        bool includeDevSeed
+        bool includeDevSeed,
+        string? webRolePassword = null
     )
     {
         var assembly = Assembly.GetExecutingAssembly();
@@ -39,28 +39,37 @@ public static class MigrationRunner
             .Build();
 
         var result = upgrader.PerformUpgrade();
-        if (result.Successful && !string.IsNullOrEmpty(appRolePassword))
+        if (result.Successful)
         {
-            SetAppRolePassword(connectionString, appRolePassword);
+            if (!string.IsNullOrEmpty(appRolePassword))
+            {
+                SetRolePassword(connectionString, "patient_portal_app", appRolePassword);
+            }
+            if (!string.IsNullOrEmpty(webRolePassword))
+            {
+                SetRolePassword(connectionString, "patient_portal_web", webRolePassword);
+            }
         }
 
         return result;
     }
 
-    // ALTER ROLE cannot take bind parameters, so the password travels as a session setting and is
-    // quoted server-side with format('%L'). It never appears in a SQL string built by this program.
-    private static void SetAppRolePassword(string connectionString, string password)
+    // ALTER ROLE cannot take bind parameters, so the role and password travel as session settings and
+    // are quoted server-side with format('%I') and format('%L'). Neither appears in a SQL string built
+    // by this program.
+    private static void SetRolePassword(string connectionString, string role, string password)
     {
         using var connection = new NpgsqlConnection(connectionString);
         connection.Open();
 
         using (
             var stash = new NpgsqlCommand(
-                "SELECT set_config('migrations.app_role_password', @password, false)",
+                "SELECT set_config('migrations.role', @role, false), set_config('migrations.password', @password, false)",
                 connection
             )
         )
         {
+            stash.Parameters.AddWithValue("role", role);
             stash.Parameters.AddWithValue("password", password);
             stash.ExecuteNonQuery();
         }
@@ -69,7 +78,7 @@ public static class MigrationRunner
             """
             DO $$
             BEGIN
-                EXECUTE format('ALTER ROLE patient_portal_app PASSWORD %L', current_setting('migrations.app_role_password'));
+                EXECUTE format('ALTER ROLE %I PASSWORD %L', current_setting('migrations.role'), current_setting('migrations.password'));
             END;
             $$
             """,
@@ -77,7 +86,10 @@ public static class MigrationRunner
         );
         alter.ExecuteNonQuery();
 
-        using var clear = new NpgsqlCommand("RESET migrations.app_role_password", connection);
+        using var clear = new NpgsqlCommand(
+            "RESET migrations.role; RESET migrations.password",
+            connection
+        );
         clear.ExecuteNonQuery();
     }
 }

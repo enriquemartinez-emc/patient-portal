@@ -14,11 +14,15 @@ public sealed class AppRolePasswordTests
         return container;
     }
 
-    private static async Task LoginAsync(string ownerConnectionString, string password)
+    private static async Task LoginAsync(
+        string ownerConnectionString,
+        string password,
+        string role = PostgresFixture.AppRole
+    )
     {
         var connectionString = new NpgsqlConnectionStringBuilder(ownerConnectionString)
         {
-            Username = PostgresFixture.AppRole,
+            Username = role,
             Password = password,
             Pooling = false,
         }.ConnectionString;
@@ -94,5 +98,27 @@ public sealed class AppRolePasswordTests
 
         Assert.True(result.Successful);
         await LoginAsync(connectionString, "kept-password");
+    }
+
+    [Fact]
+    public async Task The_web_role_gets_its_own_password_independent_of_the_app_role()
+    {
+        await using var container = await StartAsync();
+        var connectionString = container.GetConnectionString();
+
+        var result = MigrationRunner.Run(
+            connectionString,
+            appRolePassword: "app-password",
+            includeDevSeed: false,
+            webRolePassword: "web-password"
+        );
+
+        Assert.True(result.Successful);
+        await LoginAsync(connectionString, "app-password", PostgresFixture.AppRole);
+        await LoginAsync(connectionString, "web-password", PostgresFixture.WebRole);
+        var mixedUp = await Assert.ThrowsAsync<PostgresException>(() =>
+            LoginAsync(connectionString, "app-password", PostgresFixture.WebRole)
+        );
+        Assert.Equal(PostgresErrorCodes.InvalidPassword, mixedUp.SqlState);
     }
 }

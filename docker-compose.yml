@@ -51,6 +51,7 @@ services:
     environment:
       MIGRATIONS_CONNECTION_STRING: Host=postgres;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
       APP_ROLE_PASSWORD: ${APP_ROLE_PASSWORD}
+      WEB_ROLE_PASSWORD: ${WEB_ROLE_PASSWORD}
       MIGRATIONS_INCLUDE_DEV_SEED: "true"
     depends_on:
       postgres:
