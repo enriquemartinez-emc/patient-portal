@@ -514,6 +514,7 @@ web/pnpm-debug.log*
 
 # env files (can opt-in for committing if needed)
 web/.env*
+!web/.env.example
 
 # typescript
 web/*.tsbuildinfo

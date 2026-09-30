@@ -63,8 +63,6 @@ docker-compose.yml
 - Keycloak must be reached at `http://localhost:8080` by the browser
   and `http://keycloak:8080` internally — `KC_HOSTNAME=localhost` keeps
   the issuer consistent regardless of which path a request took.
-- `api` and `postgres` have no `ports:` entry in Docker Compose — they
-  are unreachable from the host by design. Don't "fix" this by adding one.
 
 ## Quality
 
