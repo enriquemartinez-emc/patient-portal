@@ -87,12 +87,21 @@ services:
       target: web
     environment:
       API_BASE_URL: http://api:8080
-      # Demo sign-in accounts; removed when real authentication is added.
-      ENABLE_DEMO_AUTH: "true"
+      # Public address of this app: where Keycloak sends the browser back after sign-in.
+      BETTER_AUTH_URL: http://localhost:3000
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+      WEB_DATABASE_URL: postgres://patient_portal_web:${WEB_ROLE_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      # Internal address; Keycloak's discovery document supplies the public addresses.
+      KEYCLOAK_ISSUER: http://keycloak:8080/realms/patient-portal
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_PORTAL_WEB_SECRET}
+      # Lists the demo users on the sign-in page.
+      SHOW_DEMO_ACCOUNTS: "true"
     ports:
       - "3000:3000"
     depends_on:
       api:
+        condition: service_healthy
+      keycloak:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/"]

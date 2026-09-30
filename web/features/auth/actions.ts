@@ -1,42 +1,28 @@
 "use server"
 
+import { headers } from "next/headers"
 import { redirect } from "next/navigation"
-import { z } from "zod"
 
-import { authenticateDemoAccount } from "@/features/auth/demo-accounts"
-import {
-  clearSession,
-  isDemoAuthEnabled,
-  writeSession,
-} from "@/features/auth/session"
+import { getAuth } from "@/lib/auth"
 
-const signInSchema = z.object({
-  email: z.email(),
-  password: z.string().min(1),
-})
-
-// Signing in is the one action that runs without a session: it is how one is created.
-export async function signInAction(formData: FormData): Promise<void> {
-  if (!isDemoAuthEnabled()) {
-    redirect("/")
-  }
-
-  const parsed = signInSchema.safeParse({
-    email: formData.get("email"),
-    password: formData.get("password"),
+// Signing in and out are the two actions that run without a session: one creates it, the other ends it.
+export async function signInAction(): Promise<void> {
+  const { url } = await getAuth().api.signInSocial({
+    body: { provider: "keycloak", callbackURL: "/", disableRedirect: true },
+    headers: await headers(),
   })
-  const account = parsed.success
-    ? authenticateDemoAccount(parsed.data.email, parsed.data.password)
-    : undefined
-  if (!account) {
-    redirect("/login?error=invalid")
+  if (!url) {
+    throw new Error("Keycloak did not return a sign-in address.")
   }
-
-  await writeSession(account.email)
-  redirect(`/${account.session.kind}`)
+  redirect(url)
 }
 
 export async function signOutAction(): Promise<void> {
-  await clearSession()
-  redirect("/login")
+  // Ends the portal session, then sends the browser to Keycloak to end its session too, so the
+  // next sign-in asks for credentials again.
+  const result = await getAuth().api.signOut({
+    body: { callbackURL: "/login", disableRedirect: true },
+    headers: await headers(),
+  })
+  redirect(result.url ?? "/login")
 }

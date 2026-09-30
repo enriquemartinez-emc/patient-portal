@@ -2,8 +2,11 @@ import "server-only"
 
 import type { z } from "zod"
 
+import { getAccessToken } from "@/lib/auth"
+
 // The only module that talks to the .NET API. It runs on the server (Server Components and
-// Server Actions), so the browser never calls the API and never sees a credential.
+// Server Actions) and adds the signed-in user's token, so the browser never calls the API and
+// never sees a credential.
 
 export class ApiError extends Error {
   constructor(
@@ -48,10 +51,12 @@ async function send(
   path: string,
   body?: unknown
 ): Promise<Response> {
+  const token = await getAccessToken()
   const response = await fetch(`${baseUrl()}${path}`, {
     method,
     headers: {
       Accept: "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(body === undefined ? {} : { "Content-Type": "application/json" }),
     },
     body: body === undefined ? undefined : JSON.stringify(body),

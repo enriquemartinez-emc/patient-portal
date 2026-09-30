@@ -1,5 +1,6 @@
-import { notFound, redirect } from "next/navigation"
+import { redirect } from "next/navigation"
 
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -8,26 +9,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { signInAction } from "@/features/auth/actions"
+import { signInAction, signOutAction } from "@/features/auth/actions"
 import { DEMO_PASSWORD, demoAccounts } from "@/features/auth/demo-accounts"
-import { getSession, isDemoAuthEnabled } from "@/features/auth/session"
+import { getAuthSession, getSession } from "@/features/auth/session"
 
-export default async function LoginPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ error?: string }>
-}) {
+export const metadata = { title: "Sign in · Patient Portal" }
+
+export default async function LoginPage() {
   const session = await getSession()
-  if (!isDemoAuthEnabled()) {
-    notFound()
-  }
   if (session) {
     redirect(`/${session.kind}`)
   }
-
-  const { error } = await searchParams
+  // Signed in with Keycloak, but the login is not linked to a patient, clinician or researcher.
+  const unlinked = (await getAuthSession()) !== null
 
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-md flex-col justify-center gap-6 px-6 py-12">
@@ -38,64 +32,64 @@ export default async function LoginPage({
         </p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Sign in</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form action={signInAction} className="flex flex-col gap-4">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="username"
-                required
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-              />
-            </div>
-            {error === "invalid" && (
-              <p role="alert" className="text-sm text-destructive">
-                Incorrect email or password.
-              </p>
-            )}
-            <Button type="submit">Sign in</Button>
-          </form>
-        </CardContent>
-      </Card>
+      {unlinked ? (
+        <Alert variant="destructive">
+          <AlertTitle>This account has no portal access</AlertTitle>
+          <AlertDescription className="flex flex-col items-start gap-3">
+            <span>
+              You are signed in, but the account is not linked to a patient,
+              clinician or researcher record.
+            </span>
+            <form action={signOutAction}>
+              <Button type="submit" variant="outline" size="sm">
+                Sign out
+              </Button>
+            </form>
+          </AlertDescription>
+        </Alert>
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle>Sign in</CardTitle>
+            <CardDescription>
+              You will sign in on the Keycloak page and come back here.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form action={signInAction}>
+              <Button type="submit" className="w-full">
+                Sign in
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Demo accounts</CardTitle>
-          <CardDescription>
-            Sample data for trying the portal. Every account uses the password{" "}
-            <code className="font-mono text-foreground">{DEMO_PASSWORD}</code>.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ul className="flex flex-col gap-2 text-sm">
-            {demoAccounts.map((account) => (
-              <li key={account.email} className="flex flex-col">
-                <span className="font-mono">{account.email}</span>
-                <span className="text-muted-foreground">
-                  {account.session.name} ·{" "}
-                  <span className="capitalize">{account.session.kind}</span>
-                </span>
-              </li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
+      {process.env.SHOW_DEMO_ACCOUNTS === "true" && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Demo accounts</CardTitle>
+            <CardDescription>
+              Sample data for trying the portal. Every account uses the password{" "}
+              <code className="font-mono text-foreground">{DEMO_PASSWORD}</code>
+              .
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ul className="flex flex-col gap-2 text-sm">
+              {demoAccounts.map((account) => (
+                <li key={account.email} className="flex flex-col">
+                  <span className="font-mono">{account.email}</span>
+                  <span className="text-muted-foreground">
+                    {account.name} ·{" "}
+                    <span className="capitalize">{account.role}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
     </main>
   )
 }

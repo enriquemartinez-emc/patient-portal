@@ -1,29 +1,26 @@
 import "server-only"
 
-import { cookies } from "next/headers"
+import { headers } from "next/headers"
 import { redirect } from "next/navigation"
 import { cache } from "react"
 
+import { getMe } from "@/features/auth/repository"
 import type { Session, SessionKind } from "@/features/auth/types"
-import { findDemoAccount } from "@/features/auth/demo-accounts"
-import { SESSION_COOKIE } from "@/features/auth/session-cookie"
+import { getAuth } from "@/lib/auth"
 
-// Demo authentication: the session cookie holds the email of a demo account. This module is the
-// single place the rest of the app learns who is signed in; real authentication replaces it.
-export function isDemoAuthEnabled(): boolean {
-  return process.env.ENABLE_DEMO_AUTH === "true"
-}
+// Better-Auth's own session: proves someone signed in with Keycloak. Deduplicated per request.
+export const getAuthSession = cache(async () => {
+  // Reading the request's headers opts every page that asks who is signed in into per-request
+  // rendering, so a signed-out redirect can never be prerendered at build time.
+  const requestHeaders = await headers()
+  return getAuth().api.getSession({ headers: requestHeaders })
+})
 
-// Deduplicated per request, so the layout, page and actions can all ask without repeating work.
+// Who is signed in as a patient, clinician or researcher, or null. Deduplicated per request, so the
+// layout, page and actions can all ask without repeating the sign-in check or the API call.
 export const getSession = cache(async (): Promise<Session | null> => {
-  // Read the request's cookies before anything else: it opts every page that asks who is signed
-  // in into per-request rendering, so a signed-out redirect can never be prerendered at build time.
-  const store = await cookies()
-  if (!isDemoAuthEnabled()) {
-    return null
-  }
-  const email = store.get(SESSION_COOKIE)?.value
-  return (email && findDemoAccount(email)?.session) || null
+  const authSession = await getAuthSession()
+  return authSession ? getMe() : null
 })
 
 // For Server Actions: fails the request when nobody is signed in. Every action that changes
@@ -51,16 +48,4 @@ export async function requireSessionPage(kind?: SessionKind): Promise<Session> {
     redirect(`/${session.kind}`)
   }
   return session
-}
-
-export async function writeSession(email: string): Promise<void> {
-  ;(await cookies()).set(SESSION_COOKIE, email, {
-    httpOnly: true,
-    sameSite: "lax",
-    path: "/",
-  })
-}
-
-export async function clearSession(): Promise<void> {
-  ;(await cookies()).delete(SESSION_COOKIE)
 }
