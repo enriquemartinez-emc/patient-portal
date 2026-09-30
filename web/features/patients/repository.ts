@@ -3,7 +3,7 @@ import "server-only"
 import { z } from "zod"
 
 import type { PatientSummary } from "@/core/patients/patients.types"
-import { apiGet } from "@/shell/api-client"
+import { apiGet } from "@/lib/api/server"
 
 const patientSummarySchema = z.object({
   id: z.guid(),

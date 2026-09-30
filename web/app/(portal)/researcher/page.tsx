@@ -4,7 +4,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { requireSessionPage } from "@/shell/session"
+import { requireSessionPage } from "@/features/auth/session"
 
 export default async function ResearcherHomePage() {
   const session = await requireSessionPage("researcher")

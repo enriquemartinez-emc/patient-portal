@@ -3,9 +3,9 @@ import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import { navigationFor, personaLabel } from "@/core/session/session.rules"
-import type { Session } from "@/core/session/session.types"
-import { endSession } from "@/features/session/actions"
+import { navigationFor, personaLabel } from "@/core/auth/auth.rules"
+import type { Session } from "@/core/auth/auth.types"
+import { signOutAction } from "@/features/auth/actions"
 
 export function PortalShell({
   session,
@@ -37,9 +37,9 @@ export function PortalShell({
             <Badge variant="secondary">{personaLabel(session.kind)}</Badge>
             <span>{session.name}</span>
             <Separator orientation="vertical" className="h-5" />
-            <form action={endSession}>
+            <form action={signOutAction}>
               <Button type="submit" variant="ghost" size="sm">
-                Switch user
+                Sign out
               </Button>
             </form>
           </div>

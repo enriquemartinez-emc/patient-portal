@@ -4,8 +4,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { listLabResults } from "@/features/lab-results/api"
-import { requireSessionPage } from "@/shell/session"
+import { listLabResults } from "@/features/lab-results/repository"
+import { requireSessionPage } from "@/features/auth/session"
 
 export default async function PatientHomePage() {
   const session = await requireSessionPage("patient")

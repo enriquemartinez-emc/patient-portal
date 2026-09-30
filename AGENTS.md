@@ -9,7 +9,8 @@ also see.
 ## Tech stack
 
 - **Frontend (BFF)**: Next.js (App Router), Functional Core / Imperative
-  Shell split (`/core` pure, `/shell` I/O), shadcn/ui for components
+  Shell split (`core/` pure; `features/` and `lib/api` do I/O — see
+  "Web layout"), shadcn/ui for components
 - **Backend API**: .NET 10 minimal API, FCIS (pure Core class library +
   one use-case file per endpoint holding Request/Response, endpoint, handler
   orchestration, SQL and file-scoped row DTOs — see `emc-fcis-feature-slice`
@@ -43,6 +44,34 @@ also see.
 /keycloak     — realm-export.json (roles, clients, seed users)
 docker-compose.yml
 ```
+
+## Web layout (`/web`, no `src/` folder)
+
+Follows the `emc-fcis-nextjs-feature-slice` skill. The .NET API plays the role
+of the database, so `repository.ts` files call it instead of querying SQL.
+
+- `app/` — thin routing layer: renders a feature's components, holds no
+  business logic.
+- `core/{feature}/` — functional core: `{feature}.types.ts` (discriminated
+  unions) and `{feature}.rules.ts` (pure functions). No React, no I/O, no
+  third-party dependencies, no imports from `app/`, `features/` or `lib/`
+  (ESLint-enforced). Pass `now` in; never read the clock.
+- `features/{feature}/` — imperative shell: `repository.ts` (calls to the .NET
+  API, no business rules), `actions.ts` (`'use server'`: parse untrusted input
+  with Zod, load via the repository, narrow into the Core type, call Core,
+  persist), and `components/`.
+- `features/auth/` — `session.ts` (`getSession`, `requireSession` for actions,
+  `requireSessionPage` for pages) and `actions.ts` (sign in/out). Server
+  Actions are public endpoints: every action that changes data calls
+  `requireSession()` itself, never relying on the layout or `proxy.ts`.
+  `getSession` is wrapped in React `cache()` so one request resolves it once.
+- `lib/api/server.ts` — the only module that may call `fetch`; `server-only`;
+  every `repository.ts` goes through it. The browser never calls the API.
+- `proxy.ts` — only redirects requests without a session cookie to `/login`.
+  It is not an authorization check.
+- `components/ui/` — shared shadcn primitives.
+- Until Keycloak and Better-Auth are added, sign-in uses demo accounts
+  (`features/auth/demo-accounts.ts`, enabled by `ENABLE_DEMO_AUTH`).
 
 ## Available skills
 

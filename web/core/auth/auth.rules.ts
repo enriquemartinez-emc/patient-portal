@@ -1,4 +1,8 @@
-import type { NavItem, Session, SessionKind } from "./session.types"
+import type { NavItem, Session, SessionKind } from "./auth.types"
+
+// Name of the cookie that carries the session. Lives in core/ so proxy.ts can share the
+// constant without importing any server code.
+export const SESSION_COOKIE = "demo_session"
 
 export function homePathFor(session: Session): string {
   switch (session.kind) {

@@ -1,5 +1,5 @@
-import { PortalShell } from "@/features/session/components/portal-shell"
-import { requireSessionPage } from "@/shell/session"
+import { PortalShell } from "@/features/auth/components/portal-shell"
+import { requireSessionPage } from "@/features/auth/session"
 
 export default async function PortalLayout({
   children,

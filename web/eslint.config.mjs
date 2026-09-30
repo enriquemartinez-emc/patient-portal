@@ -17,12 +17,10 @@ const eslintConfig = defineConfig([
               group: [
                 "@/app/*",
                 "@/features/*",
-                "@/shell/*",
                 "@/components/*",
                 "@/lib/*",
                 "**/app/**",
                 "**/features/**",
-                "**/shell/**",
                 "react",
                 "react-dom",
                 "next",
@@ -37,17 +35,17 @@ const eslintConfig = defineConfig([
       ],
     },
   },
-  // BFF: only shell/ may make HTTP calls, and shell/ modules are `server-only`.
+  // BFF: only lib/api may make HTTP calls, and it is `server-only`.
   {
     files: ["**/*.{ts,tsx}"],
-    ignores: ["shell/**"],
+    ignores: ["lib/api/**"],
     rules: {
       "no-restricted-globals": [
         "error",
         {
           name: "fetch",
           message:
-            "Only shell/ may call fetch. The browser never calls the API; go through a Server Component or Server Action.",
+            "Only lib/api may call fetch. The browser never calls the API; go through a Server Component or Server Action.",
         },
       ],
     },

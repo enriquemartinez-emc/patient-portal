@@ -3,7 +3,7 @@ import "server-only"
 import { z } from "zod"
 
 import type { LabResult } from "@/core/lab-results/lab-results.types"
-import { apiGet } from "@/shell/api-client"
+import { apiGet } from "@/lib/api/server"
 
 const labResultSchema = z.object({
   id: z.guid(),

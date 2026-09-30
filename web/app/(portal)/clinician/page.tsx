@@ -6,8 +6,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { listMyPatients } from "@/features/patients/api"
-import { requireSessionPage } from "@/shell/session"
+import { listMyPatients } from "@/features/patients/repository"
+import { requireSessionPage } from "@/features/auth/session"
 
 export default async function ClinicianHomePage() {
   const session = await requireSessionPage("clinician")
