@@ -266,6 +266,38 @@ public sealed class AuditTrailTests(PostgresFixture postgres) : IDisposable
     }
 
     [Fact]
+    public async Task Refused_access_attempts_can_be_filtered_like_any_other_action()
+    {
+        await using var owner = await postgres.OpenOwnerConnectionAsync();
+        var patient = await SchemaData.InsertPatientAsync(owner);
+        var clinic = await SchemaData.InsertOrganizationAsync(owner, "clinic");
+        var clinician = await SchemaData.InsertClinicianAsync(owner, clinic);
+        await SchemaData.InsertAuditEntryAtAsync(
+            owner,
+            patient,
+            "clinician",
+            clinician,
+            _api.Time.Now.AddHours(-2)
+        );
+        await owner.ExecuteAsync(
+            """
+            INSERT INTO audit_log (occurred_at, actor_kind, actor_id, patient_id, action)
+            VALUES (@occurredAt, 'clinician', @clinician, @patient, 'access_denied')
+            """,
+            new
+            {
+                occurredAt = _api.Time.Now.AddHours(-1),
+                clinician,
+                patient,
+            }
+        );
+
+        var refused = await GetPageAsync(patient, "?action=access_denied");
+
+        Assert.Equal(["access_denied"], refused.Items.Select(item => item.Action));
+    }
+
+    [Fact]
     public async Task An_unknown_action_filter_is_rejected()
     {
         await using var owner = await postgres.OpenOwnerConnectionAsync();

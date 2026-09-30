@@ -19,6 +19,7 @@ public sealed class ListAuditTrailValidator : PagedRequestValidator<ListAuditTra
         "lab_results_read",
         "consent_granted",
         "consent_revoked",
+        "access_denied",
     ];
 
     public ListAuditTrailValidator()
