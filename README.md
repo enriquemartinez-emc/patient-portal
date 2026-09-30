@@ -18,6 +18,47 @@ docker compose up --build
 
 The API and Postgres publish no host ports on purpose; only the web app and Keycloak are reachable from the host.
 
+## Using the app
+
+Open <http://localhost:3000> and choose **Sign in**. You sign in on the Keycloak page with one of the demo accounts
+below (the sign-in page lists them too). They all use the password `demo-password`.
+
+| Account | Role | What they can do |
+| --- | --- | --- |
+| `emily.carter@demo.example` | Patient | Has 4 lab results. Shares hematology and lipids with Riverside Clinic. |
+| `james.wilson@demo.example` | Patient | Has 4 lab results. Shares biochemistry with Meridian Research Institute. |
+| `sarah.thompson@demo.example` | Clinician, Northside Clinic | Treats Emily, so sees all her results. |
+| `michael.brown@demo.example` | Clinician, Riverside Clinic | Treats James. Sees only what Emily shared with his clinic. |
+| `laura.davies@demo.example` | Researcher, Meridian Research Institute | Sees James as an anonymous participant, biochemistry only. |
+
+### A tour
+
+Use a private window for the second person: Keycloak keeps one sign-in per browser, so signing in as someone else in the
+same window replaces the first.
+
+1. **As Emily**: the home page lists her lab results by category. Select a test to open it.
+2. **Consents** (still as Emily): under *Share your results*, choose *Meridian Research Institute*, tick *Lipids*, give a
+   reason, and optionally set a date to stop sharing. Select **Share results**. It appears under *Active*.
+3. **As Laura** (private window): *Participants* now has a second anonymous participant with only *Lipids*. That is
+   Emily; the other, *Participant 00000002*, is James. Open her to see just those results. Names are never shown to
+   researchers.
+4. **As Sarah**: *Patients* shows Emily with "You treat this patient". Open her: all four categories are there, with
+   a notice that the access is recorded.
+5. **Back as Emily**: *Access history* now shows "Dr. Sarah Thompson (Northside Clinic) viewed 4 lab results" and Laura's
+   view. Use the *Show* filter to narrow it by type.
+6. **As Michael**: Emily appears as "Shared with your organization". Open her: only *Hematology* and *Lipids*,
+   because that is all she shared with his clinic.
+7. **Revoke** (as Emily): on *Consents*, select **Revoke access** on the Meridian consent and confirm. Laura loses access
+   at once, and the revoke is in Emily's access history.
+
+`admin@demo.example` signs in but has no patient, clinician or researcher record, so it sees a "no portal access" page.
+It exists for managing treatment relationships through the API.
+
+### Starting over
+
+`docker compose down -v` stops everything and deletes the data. The next `docker compose up --build` re-creates the
+database with the demo data and re-imports the Keycloak realm. `docker compose down` alone keeps the data.
+
 ## How it fits together
 
 ```
