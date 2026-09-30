@@ -4,6 +4,8 @@ namespace PatientPortal.Core.Domain;
 // can never silently change the API contract or what is stored.
 public static class LabCategoryNames
 {
+    public static readonly IReadOnlyList<LabCategory> All = Enum.GetValues<LabCategory>();
+
     public static string ToName(LabCategory category) =>
         category switch
         {

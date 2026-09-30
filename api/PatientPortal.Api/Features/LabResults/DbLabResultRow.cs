@@ -1,6 +1,8 @@
+using PatientPortal.Core.Domain;
+
 namespace PatientPortal.Api.Features.LabResults;
 
-// Shared by the two lab result reads, which select the same columns.
+// Shared by every lab result read, which all select the same columns.
 internal sealed record DbLabResultRow(
     Guid Id,
     string Category,
@@ -11,4 +13,16 @@ internal sealed record DbLabResultRow(
 )
 {
     public LabResultResponse ToResponse() => new(Id, Category, TestName, Value, Unit, CollectedAt);
+
+    public LabResult ToLabResult(PatientId patient) =>
+        new(
+            new LabResultId(Id),
+            patient,
+            LabCategoryNames.TryParse(Category, out var category)
+                ? category
+                : throw new InvalidOperationException($"Unsupported lab category '{Category}'."),
+            new LabTestName(TestName),
+            new LabValue(Value, Unit),
+            CollectedAt
+        );
 }

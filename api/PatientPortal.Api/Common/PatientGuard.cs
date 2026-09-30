@@ -9,12 +9,14 @@ public static class PatientGuard
     public static async Task<bool> ExistsAsync(
         NpgsqlConnection connection,
         Guid patientId,
-        CancellationToken ct
+        CancellationToken ct,
+        NpgsqlTransaction? transaction = null
     ) =>
         await connection.ExecuteScalarAsync<bool>(
             new CommandDefinition(
                 "select exists (select 1 from patients where id = @patientId)",
                 new { patientId },
+                transaction,
                 cancellationToken: ct
             )
         );

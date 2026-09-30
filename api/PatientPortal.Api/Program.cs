@@ -2,8 +2,11 @@ using FluentValidation;
 using Npgsql;
 using PatientPortal.Api.Common;
 using PatientPortal.Api.Features.Audit;
+using PatientPortal.Api.Features.Clinicians;
 using PatientPortal.Api.Features.Consents;
 using PatientPortal.Api.Features.LabResults;
+using PatientPortal.Api.Features.Researchers;
+using PatientPortal.Api.Features.Treatment;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,6 +38,9 @@ app.MapHealthChecks("/health");
 app.MapLabResultsEndpoints();
 app.MapConsentsEndpoints();
 app.MapAuditEndpoints();
+app.MapTreatmentEndpoints();
+app.MapCliniciansEndpoints();
+app.MapResearchersEndpoints();
 
 app.Run();
 

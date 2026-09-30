@@ -104,12 +104,13 @@ internal static class SchemaData
         Guid granteeId,
         DateTimeOffset grantedAt,
         DateTimeOffset? expiresAt = null,
-        DateTimeOffset? revokedAt = null
+        DateTimeOffset? revokedAt = null,
+        string[]? categories = null
     ) =>
         await owner.ExecuteScalarAsync<Guid>(
             """
             INSERT INTO consent_grants (patient_id, grantee_organization_id, categories, purpose, granted_at, expires_at, revoked_at)
-            VALUES (@patientId, @granteeId, ARRAY['lipids'], 'Seeded purpose', @grantedAt, @expiresAt, @revokedAt)
+            VALUES (@patientId, @granteeId, @categories, 'Seeded purpose', @grantedAt, @expiresAt, @revokedAt)
             RETURNING id
             """,
             new
@@ -119,6 +120,7 @@ internal static class SchemaData
                 grantedAt,
                 expiresAt,
                 revokedAt,
+                categories = categories ?? ["lipids"],
             }
         );
 
@@ -143,4 +145,65 @@ internal static class SchemaData
                 patientId,
             }
         );
+
+    public static async Task<Guid> InsertNamedPatientAsync(NpgsqlConnection owner, string name) =>
+        await owner.ExecuteScalarAsync<Guid>(
+            "INSERT INTO patients (full_name, date_of_birth) VALUES (@name, '1990-01-01') RETURNING id",
+            new { name }
+        );
+
+    public static async Task<Guid> InsertResearcherAsync(
+        NpgsqlConnection owner,
+        Guid organizationId
+    ) =>
+        await owner.ExecuteScalarAsync<Guid>(
+            "INSERT INTO researchers (organization_id, full_name) VALUES (@organizationId, 'Test Researcher') RETURNING id",
+            new { organizationId }
+        );
+
+    public static async Task<Guid> InsertTreatmentAsync(
+        NpgsqlConnection owner,
+        Guid patientId,
+        Guid clinicianId,
+        DateTimeOffset startedAt,
+        DateTimeOffset? endedAt = null
+    ) =>
+        await owner.ExecuteScalarAsync<Guid>(
+            """
+            INSERT INTO treatment_relationships (patient_id, clinician_id, started_at, ended_at)
+            VALUES (@patientId, @clinicianId, @startedAt, @endedAt)
+            RETURNING id
+            """,
+            new
+            {
+                patientId,
+                clinicianId,
+                startedAt,
+                endedAt,
+            }
+        );
+
+    public static async Task<List<AuditReadRow>> AuditReadsAsync(
+        NpgsqlConnection owner,
+        Guid patientId
+    ) =>
+        (
+            await owner.QueryAsync<AuditReadRow>(
+                """
+                SELECT actor_kind AS ActorKind, actor_id AS ActorId, action AS Action,
+                       lab_result_ids AS LabResultIds, occurred_at AS OccurredAt
+                FROM audit_log WHERE patient_id = @patientId ORDER BY occurred_at, id
+                """,
+                new { patientId }
+            )
+        ).ToList();
+}
+
+public sealed class AuditReadRow
+{
+    public string ActorKind { get; set; } = "";
+    public Guid ActorId { get; set; }
+    public string Action { get; set; } = "";
+    public Guid[] LabResultIds { get; set; } = [];
+    public DateTimeOffset OccurredAt { get; set; }
 }

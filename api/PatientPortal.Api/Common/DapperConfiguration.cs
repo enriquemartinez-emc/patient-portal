@@ -12,6 +12,7 @@ public static class DapperConfiguration
     public static void Register()
     {
         SqlMapper.AddTypeHandler(new DateTimeOffsetHandler());
+        SqlMapper.AddTypeHandler(new DateOnlyHandler());
         SqlMapper.AddTypeHandler(new TextArrayHandler());
         SqlMapper.AddTypeHandler(new UuidArrayHandler());
     }
@@ -30,6 +31,22 @@ public static class DapperConfiguration
                 ),
                 _ => throw new InvalidCastException(
                     $"Cannot convert {value.GetType()} to DateTimeOffset."
+                ),
+            };
+    }
+
+    private sealed class DateOnlyHandler : SqlMapper.TypeHandler<DateOnly>
+    {
+        public override void SetValue(IDbDataParameter parameter, DateOnly value) =>
+            parameter.Value = value;
+
+        public override DateOnly Parse(object value) =>
+            value switch
+            {
+                DateOnly date => date,
+                DateTime dateTime => DateOnly.FromDateTime(dateTime),
+                _ => throw new InvalidCastException(
+                    $"Cannot convert {value.GetType()} to DateOnly."
                 ),
             };
     }
