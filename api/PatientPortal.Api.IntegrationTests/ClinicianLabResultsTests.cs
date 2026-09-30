@@ -62,6 +62,20 @@ public sealed class ClinicianLabResultsTests(PostgresFixture postgres) : IDispos
         return [.. body!.Items.Select(item => item.Id)];
     }
 
+    // A refusal returns no data and is recorded in the patient's audit trail as an access_denied entry.
+    private async Task AssertRefusedAndRecordedAsync(HttpResponseMessage response, World w)
+    {
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.DoesNotContain("testName", await response.Content.ReadAsStringAsync());
+        await using var owner = await postgres.OpenOwnerConnectionAsync();
+        var entry = Assert.Single(await SchemaData.AuditReadsAsync(owner, w.Patient));
+        Assert.Equal("clinician", entry.ActorKind);
+        Assert.Equal(w.Clinician, entry.ActorId);
+        Assert.Equal("access_denied", entry.Action);
+        Assert.Empty(entry.LabResultIds);
+        Assert.Equal(_api.Time.Now, entry.OccurredAt);
+    }
+
     [Fact]
     public async Task A_treating_clinician_sees_every_category_and_the_read_is_audited()
     {
@@ -156,20 +170,15 @@ public sealed class ClinicianLabResultsTests(PostgresFixture postgres) : IDispos
     }
 
     [Fact]
-    public async Task Without_treatment_or_consent_nothing_is_returned_but_the_read_is_still_audited()
+    public async Task Without_treatment_or_consent_access_is_refused_and_recorded()
     {
         var w = await ArrangeAsync();
 
-        var ids = await IdsAsync(await ReadAsync(w));
-
-        Assert.Empty(ids);
-        await using var owner = await postgres.OpenOwnerConnectionAsync();
-        var entry = Assert.Single(await SchemaData.AuditReadsAsync(owner, w.Patient));
-        Assert.Empty(entry.LabResultIds);
+        await AssertRefusedAndRecordedAsync(await ReadAsync(w), w);
     }
 
     [Fact]
-    public async Task Ended_treatment_revoked_and_expired_consents_grant_nothing()
+    public async Task Ended_treatment_revoked_and_expired_consents_do_not_grant_access()
     {
         var w = await ArrangeAsync();
         await using var owner = await postgres.OpenOwnerConnectionAsync();
@@ -196,13 +205,11 @@ public sealed class ClinicianLabResultsTests(PostgresFixture postgres) : IDispos
             expiresAt: now
         );
 
-        var ids = await IdsAsync(await ReadAsync(w));
-
-        Assert.Empty(ids);
+        await AssertRefusedAndRecordedAsync(await ReadAsync(w), w);
     }
 
     [Fact]
-    public async Task A_consent_to_another_organization_grants_nothing()
+    public async Task A_consent_to_another_organization_does_not_grant_access()
     {
         var w = await ArrangeAsync();
         await using var owner = await postgres.OpenOwnerConnectionAsync();
@@ -214,27 +221,40 @@ public sealed class ClinicianLabResultsTests(PostgresFixture postgres) : IDispos
             _api.Time.Now.AddDays(-1)
         );
 
-        var ids = await IdsAsync(await ReadAsync(w));
-
-        Assert.Empty(ids);
+        await AssertRefusedAndRecordedAsync(await ReadAsync(w), w);
     }
 
     [Fact]
-    public async Task An_unknown_clinician_or_patient_is_not_found_and_records_nothing()
+    public async Task Someone_elses_clinician_id_is_forbidden_and_records_nothing()
+    {
+        var w = await ArrangeAsync();
+        await using var owner = await postgres.OpenOwnerConnectionAsync();
+        await SchemaData.InsertTreatmentAsync(
+            owner,
+            w.Patient,
+            w.Clinician,
+            _api.Time.Now.AddDays(-10)
+        );
+        var impostor = _api.ClientWith(TestTokens.Create(Guid.NewGuid().ToString(), ["clinician"]));
+
+        var response = await impostor.GetAsync(
+            $"/clinicians/{w.Clinician}/patients/{w.Patient}/lab-results"
+        );
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.Empty(await SchemaData.AuditReadsAsync(owner, w.Patient));
+    }
+
+    [Fact]
+    public async Task A_patient_that_does_not_exist_is_forbidden_like_any_other_refusal()
     {
         var w = await ArrangeAsync();
 
-        var unknownClinician = await _api.Client.GetAsync(
-            $"/clinicians/{Guid.NewGuid()}/patients/{w.Patient}/lab-results"
-        );
-        var unknownPatient = await _api.Client.GetAsync(
+        var response = await _api.Client.GetAsync(
             $"/clinicians/{w.Clinician}/patients/{Guid.NewGuid()}/lab-results"
         );
 
-        Assert.Equal(HttpStatusCode.NotFound, unknownClinician.StatusCode);
-        Assert.Equal(HttpStatusCode.NotFound, unknownPatient.StatusCode);
-        await using var owner = await postgres.OpenOwnerConnectionAsync();
-        Assert.Empty(await SchemaData.AuditReadsAsync(owner, w.Patient));
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [Fact]
@@ -266,7 +286,7 @@ public sealed class ClinicianLabResultsTests(PostgresFixture postgres) : IDispos
     }
 
     [Fact]
-    public async Task A_read_waits_for_an_in_flight_revoke_and_then_returns_nothing()
+    public async Task A_read_waits_for_an_in_flight_revoke_and_is_then_refused()
     {
         var w = await ArrangeAsync();
         await using var setup = await postgres.OpenOwnerConnectionAsync();
@@ -297,8 +317,7 @@ public sealed class ClinicianLabResultsTests(PostgresFixture postgres) : IDispos
         Assert.False(read.IsCompleted, "The read must wait for the in-flight revoke.");
 
         await revoke.CommitAsync();
-        var ids = await IdsAsync(await read);
 
-        Assert.Empty(ids);
+        await AssertRefusedAndRecordedAsync(await read, w);
     }
 }

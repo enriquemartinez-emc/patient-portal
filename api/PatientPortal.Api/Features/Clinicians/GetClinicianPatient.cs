@@ -10,7 +10,8 @@ public static class GetClinicianPatientEndpoint
         app.MapGet("/patients/{patientId:guid}", Handle).WithName("GetClinicianPatient");
 
     // One of the clinician's patients, with the basis for the relationship. A patient the clinician
-    // neither treats nor has a consent for is not one of their patients, so it is not found.
+    // neither treats nor has a consent for is not one of their patients, so it is not found (the
+    // same answer whether that patient exists or not).
     private static async Task<Results<Ok<PatientSummaryResponse>, ProblemHttpResult>> Handle(
         Guid clinicianId,
         Guid patientId,
@@ -21,21 +22,13 @@ public static class GetClinicianPatientEndpoint
     {
         await using var connection = await dataSource.OpenConnectionAsync(ct);
 
-        var organizationId = await connection.QuerySingleOrDefaultAsync<Guid?>(
+        var organizationId = await connection.QuerySingleAsync<Guid>(
             new CommandDefinition(
                 "select organization_id from clinicians where id = @clinicianId",
                 new { clinicianId },
                 cancellationToken: ct
             )
         );
-        if (organizationId is null)
-        {
-            return TypedResults.Problem(
-                statusCode: StatusCodes.Status404NotFound,
-                title: "Clinician not found.",
-                detail: $"Clinician '{clinicianId}' does not exist."
-            );
-        }
 
         const string sql = """
             select p.id as Id, p.full_name as FullName, p.date_of_birth as DateOfBirth,

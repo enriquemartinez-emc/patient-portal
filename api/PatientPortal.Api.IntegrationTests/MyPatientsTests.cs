@@ -108,11 +108,11 @@ public sealed class MyPatientsTests(PostgresFixture postgres) : IDisposable
     }
 
     [Fact]
-    public async Task An_unknown_clinician_is_not_found()
+    public async Task Someone_elses_clinician_id_is_forbidden()
     {
         var response = await _api.Client.GetAsync($"/clinicians/{Guid.NewGuid()}/patients");
 
-        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [Theory]

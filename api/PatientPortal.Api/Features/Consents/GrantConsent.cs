@@ -46,11 +46,6 @@ public static class GrantConsentEndpoint
     {
         await using var connection = await dataSource.OpenConnectionAsync(ct);
 
-        if (!await PatientGuard.ExistsAsync(connection, patientId, ct))
-        {
-            return PatientGuard.NotFound(patientId);
-        }
-
         var granteeName = await connection.QuerySingleOrDefaultAsync<string>(
             new CommandDefinition(
                 "select name from organizations where id = @id",

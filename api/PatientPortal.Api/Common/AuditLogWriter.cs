@@ -10,7 +10,7 @@ public static class AuditLogWriter
 {
     public static async Task InsertAsync(
         NpgsqlConnection connection,
-        NpgsqlTransaction transaction,
+        NpgsqlTransaction? transaction,
         AuditLogEntry entry,
         CancellationToken ct
     )
@@ -40,14 +40,18 @@ public static class AuditLogWriter
                 Array.Empty<Guid>(),
                 (Guid?)revoked.Consent.Value
             ),
+            AccessDenied => ("access_denied", Array.Empty<Guid>(), (Guid?)null),
             _ => throw new InvalidOperationException($"Unsupported audit action '{entry.Action}'."),
         };
 
+        // Inserting through a SELECT lets a refusal for a patient that does not exist record nothing,
+        // instead of failing on the foreign key and turning a 403 into a 500.
         const string sql = """
             insert into audit_log
                 (id, occurred_at, actor_kind, actor_id, patient_id, action, lab_result_ids, consent_grant_id)
-            values
-                (@Id, @OccurredAt, @ActorKind, @ActorId, @PatientId, @Action, @LabResultIds, @ConsentGrantId)
+            select
+                @Id, @OccurredAt, @ActorKind, @ActorId, @PatientId, @Action, @LabResultIds, @ConsentGrantId
+            where exists (select 1 from patients where id = @PatientId)
             """;
 
         await connection.ExecuteAsync(

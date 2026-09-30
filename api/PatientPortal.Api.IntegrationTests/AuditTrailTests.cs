@@ -209,11 +209,11 @@ public sealed class AuditTrailTests(PostgresFixture postgres) : IDisposable
     }
 
     [Fact]
-    public async Task The_trail_of_an_unknown_patient_is_not_found()
+    public async Task The_trail_of_someone_elses_patient_id_is_forbidden()
     {
         var response = await _api.Client.GetAsync($"/patients/{Guid.NewGuid()}/audit");
 
-        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [Fact]

@@ -1,7 +1,6 @@
 using Dapper;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Npgsql;
-using PatientPortal.Api.Common;
 
 namespace PatientPortal.Api.Features.LabResults;
 
@@ -21,18 +20,13 @@ public static class ListLabResultsEndpoint
     public static void MapListLabResultsEndpoint(this IEndpointRouteBuilder app) =>
         app.MapGet("/", Handle).WithName("ListLabResults");
 
-    private static async Task<Results<Ok<ListLabResultsResponse>, ProblemHttpResult>> Handle(
+    private static async Task<Ok<ListLabResultsResponse>> Handle(
         Guid patientId,
         NpgsqlDataSource dataSource,
         CancellationToken ct
     )
     {
         await using var connection = await dataSource.OpenConnectionAsync(ct);
-
-        if (!await PatientGuard.ExistsAsync(connection, patientId, ct))
-        {
-            return PatientGuard.NotFound(patientId);
-        }
 
         const string sql = """
             select id as Id, category as Category, test_name as TestName,

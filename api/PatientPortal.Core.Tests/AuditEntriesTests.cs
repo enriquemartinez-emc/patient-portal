@@ -86,4 +86,21 @@ public sealed class AuditEntriesTests
         Assert.Equal(new PatientActor(revoked.Patient), entry.Actor);
         Assert.Equal(new ConsentRevoked(revoked.Id), entry.Action);
     }
+
+    [Fact]
+    public void A_refused_read_records_who_asked_and_whose_records_they_asked_for()
+    {
+        var actor = new ResearcherActor(new ResearcherId(Guid.NewGuid()));
+
+        var entry = AuditEntries.ForAccessDenied(
+            new AuditLogEntryId(Guid.NewGuid()),
+            TestData.Now,
+            actor,
+            TestData.Patient
+        );
+
+        Assert.Equal(actor, entry.Actor);
+        Assert.Equal(TestData.Patient, entry.Patient);
+        Assert.Equal(new AccessDenied(), entry.Action);
+    }
 }

@@ -34,7 +34,14 @@ public static class StartTreatmentEndpoint
     {
         await using var connection = await dataSource.OpenConnectionAsync(ct);
 
-        if (!await PatientGuard.ExistsAsync(connection, request.PatientId, ct))
+        var patientExists = await connection.ExecuteScalarAsync<bool>(
+            new CommandDefinition(
+                "select exists (select 1 from patients where id = @id)",
+                new { id = request.PatientId },
+                cancellationToken: ct
+            )
+        );
+        if (!patientExists)
         {
             return TypedResults.Problem(
                 statusCode: StatusCodes.Status422UnprocessableEntity,

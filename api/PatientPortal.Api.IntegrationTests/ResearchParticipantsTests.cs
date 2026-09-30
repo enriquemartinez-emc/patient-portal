@@ -108,11 +108,11 @@ public sealed class ResearchParticipantsTests(PostgresFixture postgres) : IDispo
     }
 
     [Fact]
-    public async Task An_unknown_researcher_is_not_found()
+    public async Task Someone_elses_researcher_id_is_forbidden()
     {
         var response = await _api.Client.GetAsync($"/researchers/{Guid.NewGuid()}/patients");
 
-        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [Theory]

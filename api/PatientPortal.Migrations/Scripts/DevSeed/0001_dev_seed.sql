@@ -1,19 +1,20 @@
--- Development-only sample data with fixed ids so tests and the UI can refer to it.
+-- Development-only sample data with fixed ids so tests and the UI can refer to it. The subject ids
+-- match the users in keycloak/realm-export.json.
 INSERT INTO organizations (id, name, kind) VALUES
     ('a0000000-0000-0000-0000-000000000001', 'Northside Clinic', 'clinic'),
     ('a0000000-0000-0000-0000-000000000002', 'Riverside Clinic', 'clinic'),
     ('a0000000-0000-0000-0000-000000000003', 'Meridian Research Institute', 'research_institution');
 
-INSERT INTO patients (id, full_name, date_of_birth) VALUES
-    ('b0000000-0000-0000-0000-000000000001', 'Emily Carter', '1984-03-12'),
-    ('b0000000-0000-0000-0000-000000000002', 'James Wilson', '1971-11-02');
+INSERT INTO patients (id, full_name, date_of_birth, external_subject_id) VALUES
+    ('b0000000-0000-0000-0000-000000000001', 'Emily Carter', '1984-03-12', '90000000-0000-0000-0000-000000000001'),
+    ('b0000000-0000-0000-0000-000000000002', 'James Wilson', '1971-11-02', '90000000-0000-0000-0000-000000000002');
 
-INSERT INTO clinicians (id, organization_id, full_name) VALUES
-    ('c0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', 'Dr. Sarah Thompson'),
-    ('c0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000002', 'Dr. Michael Brown');
+INSERT INTO clinicians (id, organization_id, full_name, external_subject_id) VALUES
+    ('c0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', 'Dr. Sarah Thompson', '90000000-0000-0000-0000-000000000003'),
+    ('c0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000002', 'Dr. Michael Brown', '90000000-0000-0000-0000-000000000004');
 
-INSERT INTO researchers (id, organization_id, full_name) VALUES
-    ('d0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000003', 'Dr. Laura Davies');
+INSERT INTO researchers (id, organization_id, full_name, external_subject_id) VALUES
+    ('d0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000003', 'Dr. Laura Davies', '90000000-0000-0000-0000-000000000005');
 
 -- Sarah Thompson treats Emily; Michael Brown treats James; Sarah used to treat James.
 INSERT INTO treatment_relationships (id, patient_id, clinician_id, started_at, ended_at) VALUES

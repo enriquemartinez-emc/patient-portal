@@ -81,11 +81,14 @@ public sealed class ClinicianPatientTests(PostgresFixture postgres) : IDisposabl
     }
 
     [Fact]
-    public async Task An_unknown_clinician_or_patient_is_not_found()
+    public async Task Someone_elses_clinician_id_is_forbidden_and_an_unknown_patient_is_not_found()
     {
         var (_, clinician, patient) = await ArrangeAsync();
 
-        Assert.Equal(HttpStatusCode.NotFound, (await GetAsync(Guid.NewGuid(), patient)).StatusCode);
+        Assert.Equal(
+            HttpStatusCode.Forbidden,
+            (await GetAsync(Guid.NewGuid(), patient)).StatusCode
+        );
         Assert.Equal(
             HttpStatusCode.NotFound,
             (await GetAsync(clinician, Guid.NewGuid())).StatusCode

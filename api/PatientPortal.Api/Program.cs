@@ -1,5 +1,6 @@
 using FluentValidation;
 using Npgsql;
+using PatientPortal.Api.Auth;
 using PatientPortal.Api.Common;
 using PatientPortal.Api.Features.Audit;
 using PatientPortal.Api.Features.Clinicians;
@@ -18,6 +19,7 @@ var connectionString =
 
 DapperConfiguration.Register();
 
+builder.Services.AddPortalAuthentication(builder.Configuration).AddPortalAuthorization();
 builder.Services.AddOpenApi();
 builder.Services.AddHealthChecks();
 builder.Services.AddProblemDetails();
@@ -28,14 +30,16 @@ builder.Services.AddSingleton(_ => new NpgsqlDataSourceBuilder(connectionString)
 var app = builder.Build();
 
 app.UseExceptionHandler();
+app.UseAuthentication();
+app.UseAuthorization();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
-    app.MapScalarApiReference();
+    app.MapOpenApi().AllowAnonymous();
+    app.MapScalarApiReference().AllowAnonymous();
 }
 
-app.MapHealthChecks("/health");
+app.MapHealthChecks("/health").AllowAnonymous();
 app.MapLabResultsEndpoints();
 app.MapConsentsEndpoints();
 app.MapAuditEndpoints();

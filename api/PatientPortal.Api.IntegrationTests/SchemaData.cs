@@ -6,10 +6,9 @@ namespace PatientPortal.Api.IntegrationTests;
 // Inserts through the owner connection so tests can arrange state the app role could not create.
 internal static class SchemaData
 {
+    // In tests a person's login subject is their own id, so a token for that id acts as them.
     public static async Task<Guid> InsertPatientAsync(NpgsqlConnection owner) =>
-        await owner.ExecuteScalarAsync<Guid>(
-            "INSERT INTO patients (full_name, date_of_birth) VALUES ('Test Patient', '1990-01-01') RETURNING id"
-        );
+        await InsertNamedPatientAsync(owner, "Test Patient");
 
     public static async Task<Guid> InsertOrganizationAsync(
         NpgsqlConnection owner,
@@ -23,11 +22,7 @@ internal static class SchemaData
     public static async Task<Guid> InsertClinicianAsync(
         NpgsqlConnection owner,
         Guid organizationId
-    ) =>
-        await owner.ExecuteScalarAsync<Guid>(
-            "INSERT INTO clinicians (organization_id, full_name) VALUES (@organizationId, 'Test Clinician') RETURNING id",
-            new { organizationId }
-        );
+    ) => await InsertNamedClinicianAsync(owner, organizationId, "Test Clinician");
 
     public static async Task<Guid> InsertConsentAsync(
         NpgsqlConnection connection,
@@ -92,11 +87,21 @@ internal static class SchemaData
         NpgsqlConnection owner,
         Guid organizationId,
         string name
-    ) =>
-        await owner.ExecuteScalarAsync<Guid>(
-            "INSERT INTO clinicians (organization_id, full_name) VALUES (@organizationId, @name) RETURNING id",
-            new { organizationId, name }
+    )
+    {
+        var id = Guid.CreateVersion7();
+        await owner.ExecuteAsync(
+            "INSERT INTO clinicians (id, organization_id, full_name, external_subject_id) VALUES (@id, @organizationId, @name, @subject)",
+            new
+            {
+                id,
+                organizationId,
+                name,
+                subject = id.ToString(),
+            }
         );
+        return id;
+    }
 
     public static async Task<Guid> InsertConsentAtAsync(
         NpgsqlConnection owner,
@@ -146,20 +151,38 @@ internal static class SchemaData
             }
         );
 
-    public static async Task<Guid> InsertNamedPatientAsync(NpgsqlConnection owner, string name) =>
-        await owner.ExecuteScalarAsync<Guid>(
-            "INSERT INTO patients (full_name, date_of_birth) VALUES (@name, '1990-01-01') RETURNING id",
-            new { name }
+    public static async Task<Guid> InsertNamedPatientAsync(NpgsqlConnection owner, string name)
+    {
+        var id = Guid.CreateVersion7();
+        await owner.ExecuteAsync(
+            "INSERT INTO patients (id, full_name, date_of_birth, external_subject_id) VALUES (@id, @name, '1990-01-01', @subject)",
+            new
+            {
+                id,
+                name,
+                subject = id.ToString(),
+            }
         );
+        return id;
+    }
 
     public static async Task<Guid> InsertResearcherAsync(
         NpgsqlConnection owner,
         Guid organizationId
-    ) =>
-        await owner.ExecuteScalarAsync<Guid>(
-            "INSERT INTO researchers (organization_id, full_name) VALUES (@organizationId, 'Test Researcher') RETURNING id",
-            new { organizationId }
+    )
+    {
+        var id = Guid.CreateVersion7();
+        await owner.ExecuteAsync(
+            "INSERT INTO researchers (id, organization_id, full_name, external_subject_id) VALUES (@id, @organizationId, 'Test Researcher', @subject)",
+            new
+            {
+                id,
+                organizationId,
+                subject = id.ToString(),
+            }
         );
+        return id;
+    }
 
     public static async Task<Guid> InsertTreatmentAsync(
         NpgsqlConnection owner,

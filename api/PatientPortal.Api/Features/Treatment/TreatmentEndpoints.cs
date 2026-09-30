@@ -1,10 +1,14 @@
+using PatientPortal.Api.Auth;
+
 namespace PatientPortal.Api.Features.Treatment;
 
 public static class TreatmentEndpoints
 {
     public static IEndpointRouteBuilder MapTreatmentEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/treatment-relationships").WithTags("Treatment relationships");
+        var group = app.MapGroup("/treatment-relationships")
+            .WithTags("Treatment relationships")
+            .RequireAuthorization(Policies.AdminOnly);
 
         group.MapStartTreatmentEndpoint();
         group.MapEndTreatmentEndpoint();

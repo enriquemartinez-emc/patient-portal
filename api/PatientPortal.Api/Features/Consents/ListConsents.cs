@@ -1,7 +1,6 @@
 using Dapper;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Npgsql;
-using PatientPortal.Api.Common;
 
 namespace PatientPortal.Api.Features.Consents;
 
@@ -12,7 +11,7 @@ public static class ListConsentsEndpoint
     public static void MapListConsentsEndpoint(this IEndpointRouteBuilder app) =>
         app.MapGet("/", Handle).WithName("ListConsents");
 
-    private static async Task<Results<Ok<ListConsentsResponse>, ProblemHttpResult>> Handle(
+    private static async Task<Ok<ListConsentsResponse>> Handle(
         Guid patientId,
         NpgsqlDataSource dataSource,
         TimeProvider time,
@@ -20,11 +19,6 @@ public static class ListConsentsEndpoint
     )
     {
         await using var connection = await dataSource.OpenConnectionAsync(ct);
-
-        if (!await PatientGuard.ExistsAsync(connection, patientId, ct))
-        {
-            return PatientGuard.NotFound(patientId);
-        }
 
         const string sql =
             DbConsentRow.SelectSql

@@ -1,10 +1,14 @@
+using PatientPortal.Api.Auth;
+
 namespace PatientPortal.Api.Features.Audit;
 
 public static class AuditEndpoints
 {
     public static IEndpointRouteBuilder MapAuditEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/patients/{patientId:guid}/audit").WithTags("Audit");
+        var group = app.MapGroup("/patients/{patientId:guid}/audit")
+            .WithTags("Audit")
+            .RequireAuthorization(Policies.PatientActing);
 
         group.MapListAuditTrailEndpoint();
 

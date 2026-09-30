@@ -26,9 +26,7 @@ public static class ListResearchParticipantsEndpoint
     // Participants are the patients with an in-effect consent naming the researcher's organization,
     // with the union of categories those consents cover. The consent predicate mirrors
     // ConsentRules.ApplyExpiry: a consent stops being in effect at its expiry instant.
-    private static async Task<
-        Results<Ok<PagedResponse<ResearchParticipantResponse>>, ProblemHttpResult>
-    > Handle(
+    private static async Task<Ok<PagedResponse<ResearchParticipantResponse>>> Handle(
         Guid researcherId,
         [AsParameters] ListResearchParticipantsRequest request,
         NpgsqlDataSource dataSource,
@@ -38,21 +36,13 @@ public static class ListResearchParticipantsEndpoint
     {
         await using var connection = await dataSource.OpenConnectionAsync(ct);
 
-        var organizationId = await connection.QuerySingleOrDefaultAsync<Guid?>(
+        var organizationId = await connection.QuerySingleAsync<Guid>(
             new CommandDefinition(
                 "select organization_id from researchers where id = @researcherId",
                 new { researcherId },
                 cancellationToken: ct
             )
         );
-        if (organizationId is null)
-        {
-            return TypedResults.Problem(
-                statusCode: StatusCodes.Status404NotFound,
-                title: "Researcher not found.",
-                detail: $"Researcher '{researcherId}' does not exist."
-            );
-        }
 
         const string sql = """
             select g.patient_id as PatientId,

@@ -23,11 +23,14 @@ public sealed class DevSeedTests(PostgresFixture postgres)
                 (SELECT count(*) FROM treatment_relationships WHERE ended_at IS NULL)::int AS ActiveTreatments,
                 (SELECT count(*) FROM consent_grants)::int AS Consents,
                 (SELECT count(*) FROM lab_results)::int AS LabResults,
-                (SELECT count(*) FROM audit_log)::int AS AuditEntries
+                (SELECT count(*) FROM audit_log)::int AS AuditEntries,
+                (SELECT count(*) FROM patients WHERE external_subject_id IS NULL)::int
+                    + (SELECT count(*) FROM clinicians WHERE external_subject_id IS NULL)::int
+                    + (SELECT count(*) FROM researchers WHERE external_subject_id IS NULL)::int AS PeopleWithoutLogin
             """
         );
 
-        Assert.Equal(new Counts(3, 2, 2, 1, 3, 2, 2, 8, 0), counts);
+        Assert.Equal(new Counts(3, 2, 2, 1, 3, 2, 2, 8, 0, 0), counts);
     }
 
     [Fact]
@@ -51,6 +54,7 @@ public sealed class DevSeedTests(PostgresFixture postgres)
         int ActiveTreatments,
         int Consents,
         int LabResults,
-        int AuditEntries
+        int AuditEntries,
+        int PeopleWithoutLogin
     );
 }

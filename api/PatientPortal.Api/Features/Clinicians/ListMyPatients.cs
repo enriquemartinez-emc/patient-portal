@@ -27,9 +27,7 @@ public static class ListMyPatientsEndpoint
     // A clinician's patients are those they actively treat plus those who have an in-effect consent
     // naming the clinician's organization. The consent predicate mirrors ConsentRules.ApplyExpiry:
     // a consent stops being in effect at its expiry instant.
-    private static async Task<
-        Results<Ok<PagedResponse<PatientSummaryResponse>>, ProblemHttpResult>
-    > Handle(
+    private static async Task<Ok<PagedResponse<PatientSummaryResponse>>> Handle(
         Guid clinicianId,
         [AsParameters] ListMyPatientsRequest request,
         NpgsqlDataSource dataSource,
@@ -39,21 +37,13 @@ public static class ListMyPatientsEndpoint
     {
         await using var connection = await dataSource.OpenConnectionAsync(ct);
 
-        var organizationId = await connection.QuerySingleOrDefaultAsync<Guid?>(
+        var organizationId = await connection.QuerySingleAsync<Guid>(
             new CommandDefinition(
                 "select organization_id from clinicians where id = @clinicianId",
                 new { clinicianId },
                 cancellationToken: ct
             )
         );
-        if (organizationId is null)
-        {
-            return TypedResults.Problem(
-                statusCode: StatusCodes.Status404NotFound,
-                title: "Clinician not found.",
-                detail: $"Clinician '{clinicianId}' does not exist."
-            );
-        }
 
         const string sql = """
             with candidates as (

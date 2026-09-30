@@ -94,11 +94,11 @@ public sealed class ReadConsentsTests(PostgresFixture postgres) : IDisposable
     }
 
     [Fact]
-    public async Task Listing_for_an_unknown_patient_is_not_found()
+    public async Task Listing_for_someone_elses_patient_id_is_forbidden()
     {
         var response = await _api.Client.GetAsync($"/patients/{Guid.NewGuid()}/consents");
 
-        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [Fact]

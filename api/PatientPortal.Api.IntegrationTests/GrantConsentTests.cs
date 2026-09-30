@@ -242,7 +242,7 @@ public sealed class GrantConsentTests(PostgresFixture postgres) : IDisposable
     }
 
     [Fact]
-    public async Task Granting_for_an_unknown_patient_is_not_found()
+    public async Task Granting_for_someone_elses_patient_id_is_forbidden()
     {
         await using var owner = await postgres.OpenOwnerConnectionAsync();
         var clinic = await SchemaData.InsertOrganizationAsync(owner);
@@ -257,7 +257,7 @@ public sealed class GrantConsentTests(PostgresFixture postgres) : IDisposable
             }
         );
 
-        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [Fact]

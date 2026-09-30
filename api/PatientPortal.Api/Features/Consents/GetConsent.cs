@@ -1,7 +1,6 @@
 using Dapper;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Npgsql;
-using PatientPortal.Api.Common;
 
 namespace PatientPortal.Api.Features.Consents;
 
@@ -19,11 +18,6 @@ public static class GetConsentEndpoint
     )
     {
         await using var connection = await dataSource.OpenConnectionAsync(ct);
-
-        if (!await PatientGuard.ExistsAsync(connection, patientId, ct))
-        {
-            return PatientGuard.NotFound(patientId);
-        }
 
         const string sql =
             DbConsentRow.SelectSql

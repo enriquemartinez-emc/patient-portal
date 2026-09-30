@@ -46,9 +46,7 @@ public static class ListAuditTrailEndpoint
     public static void MapListAuditTrailEndpoint(this IEndpointRouteBuilder app) =>
         app.MapGet("/", Handle).WithValidation<ListAuditTrailRequest>().WithName("ListAuditTrail");
 
-    private static async Task<
-        Results<Ok<PagedResponse<AuditEntryResponse>>, ProblemHttpResult>
-    > Handle(
+    private static async Task<Ok<PagedResponse<AuditEntryResponse>>> Handle(
         Guid patientId,
         [AsParameters] ListAuditTrailRequest request,
         NpgsqlDataSource dataSource,
@@ -56,11 +54,6 @@ public static class ListAuditTrailEndpoint
     )
     {
         await using var connection = await dataSource.OpenConnectionAsync(ct);
-
-        if (!await PatientGuard.ExistsAsync(connection, patientId, ct))
-        {
-            return PatientGuard.NotFound(patientId);
-        }
 
         // Ordered by (occurred_at desc, id desc) to match audit_log_patient_occurred_idx; the id is the tiebreaker.
         const string sql = """
