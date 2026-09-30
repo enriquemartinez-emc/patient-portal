@@ -39,8 +39,6 @@ cd web && pnpm lint && pnpm typecheck && pnpm format:check && pnpm test && pnpm 
 cd web && pnpm exec playwright install chromium && pnpm test:e2e   # browser journeys against a running stack
 ```
 
-CI (`.github/workflows/ci.yml`) runs the same three groups.
-
 ## Decisions
 
 - [0001 Core architecture decisions](docs/adr/0001-architecture-decisions.md)
