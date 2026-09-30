@@ -5,7 +5,7 @@ import { redirect } from "next/navigation"
 import { cache } from "react"
 
 import { getMe } from "@/features/auth/repository"
-import type { Session, SessionKind } from "@/features/auth/types"
+import type { Session, SessionKind, SessionState } from "@/features/auth/types"
 import { getAuth } from "@/lib/auth"
 
 export const getAuthSession = cache(async () => {
@@ -15,17 +15,23 @@ export const getAuthSession = cache(async () => {
   return getAuth().api.getSession({ headers: requestHeaders })
 })
 
-export const getSession = cache(async (): Promise<Session | null> => {
+export const getSessionState = cache(async (): Promise<SessionState> => {
   const authSession = await getAuthSession()
-  return authSession ? getMe() : null
+  return authSession ? getMe() : { status: "signed-out" }
 })
 
-// For Server Actions: fails the request when nobody is signed in. Every action that changes
-// data calls this itself, because actions are public endpoints and can be invoked directly.
+export const getSession = cache(async (): Promise<Session | null> => {
+  const state = await getSessionState()
+  return state.status === "active" ? state.session : null
+})
+
+// For Server Actions: sends the visitor to sign in when there is no usable session. Every action
+// that changes data calls this itself, because actions are public endpoints and can be invoked
+// directly. The sign-in page says why, e.g. that the session expired.
 export async function requireSession(): Promise<Session> {
   const session = await getSession()
   if (!session) {
-    throw new Error("Not signed in.")
+    redirect("/login")
   }
   return session
 }
