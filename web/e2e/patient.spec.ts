@@ -13,7 +13,7 @@ test.describe("patient", () => {
       page.getByRole("heading", { name: "Welcome back, Emily" })
     ).toBeVisible()
     await expect(
-      page.getByRole("link", { name: /^Lab results 4/ })
+      page.getByRole("link", { name: /^Lab results 26/ })
     ).toBeVisible()
     await expect(
       page.getByRole("link", { name: /^Shared with/ })
@@ -26,7 +26,8 @@ test.describe("patient", () => {
     ]) {
       await expect(page.getByText(card, { exact: true })).toBeVisible()
     }
-    await expect(page.getByRole("link", { name: "Hemoglobin" })).toBeVisible()
+    // The five newest results, all from the latest blood draw.
+    await expect(page.getByRole("link", { name: "Creatinine" })).toBeVisible()
   })
 
   test("reads their lab results and opens one", async ({ page }) => {
@@ -34,22 +35,40 @@ test.describe("patient", () => {
 
     await page.getByRole("link", { name: "Lab results", exact: true }).click()
     await expect(page).toHaveURL("/patient/lab-results")
-    await expect(page.getByText("4 results on record")).toBeVisible()
+    await expect(page.getByText("26 results on record")).toBeVisible()
+    const table = page.getByRole("table")
     for (const category of [
       "hematology",
       "biochemistry",
       "lipids",
       "endocrinology",
     ]) {
-      await expect(page.getByRole("heading", { name: category })).toBeVisible()
+      await expect(table.getByText(category).first()).toBeVisible()
     }
 
-    await page.getByRole("link", { name: "Hemoglobin" }).click()
+    // Newest first: the first Hemoglobin row is the May 2026 draw, not the older ones.
+    await page.getByRole("link", { name: "Hemoglobin" }).first().click()
     await expect(page).toHaveURL(/\/patient\/lab-results\//)
     await expect(page.getByText("13.4 g/dL")).toBeVisible()
 
     await page.getByRole("link", { name: "All lab results" }).click()
     await expect(page).toHaveURL("/patient/lab-results")
+  })
+
+  test("narrows the lab results to one category", async ({ page }) => {
+    await signIn(page, "emily.carter@demo.example")
+    await page.goto("/patient/lab-results")
+
+    await page
+      .getByRole("navigation", { name: "Filter by category" })
+      .getByRole("link", { name: /^lipids/i })
+      .click()
+
+    await expect(page).toHaveURL(/category=lipids/)
+    const table = page.getByRole("table")
+    await expect(table.getByText("lipids").first()).toBeVisible()
+    await expect(table.getByText("hematology")).toHaveCount(0)
+    await expect(table.getByText("biochemistry")).toHaveCount(0)
   })
 
   test("shares results, changes their mind at the dialog, then revokes and sees both in the history", async ({

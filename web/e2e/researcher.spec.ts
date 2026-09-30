@@ -14,15 +14,10 @@ test.describe("researcher", () => {
 
     await page.getByRole("link", { name: "Participant 00000002" }).click()
     await expect(page.getByText("This access is recorded")).toBeVisible()
-    await expect(
-      page.getByRole("heading", { name: "biochemistry" })
-    ).toBeVisible()
-    await expect(page.getByText("HbA1c")).toBeVisible()
-    await expect(page.getByRole("heading", { name: "hematology" })).toHaveCount(
-      0
-    )
-    await expect(page.getByRole("heading", { name: "urinalysis" })).toHaveCount(
-      0
-    )
+    const table = page.getByRole("table")
+    await expect(table.getByText("biochemistry").first()).toBeVisible()
+    await expect(table.getByText("HbA1c").first()).toBeVisible()
+    await expect(table.getByText("hematology")).toHaveCount(0)
+    await expect(table.getByText("urinalysis")).toHaveCount(0)
   })
 })

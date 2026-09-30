@@ -1,9 +1,9 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
-import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { requireSessionPage } from "@/features/auth/session"
+import { CategoryBadge } from "@/features/lab-results/components/category-label"
 import { getLabResult } from "@/features/lab-results/repository"
 import { formatDateTime } from "@/lib/format"
 
@@ -33,15 +33,13 @@ export default async function LabResultPage({
         <CardHeader>
           <CardTitle className="flex items-center gap-3 text-xl">
             {result.testName}
-            <Badge variant="secondary" className="capitalize">
-              {result.category}
-            </Badge>
+            <CategoryBadge category={result.category} />
           </CardTitle>
         </CardHeader>
         <CardContent>
           <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-sm">
             <dt className="text-muted-foreground">Result</dt>
-            <dd className="font-medium">
+            <dd className="font-semibold tabular-nums">
               {result.value} {result.unit}
             </dd>
             <dt className="text-muted-foreground">Collected</dt>

@@ -30,7 +30,7 @@ public sealed class DevSeedTests(PostgresFixture postgres)
             """
         );
 
-        Assert.Equal(new Counts(3, 2, 2, 1, 3, 2, 2, 8, 0, 0), counts);
+        Assert.Equal(new Counts(3, 2, 2, 1, 3, 2, 2, 45, 0, 0), counts);
     }
 
     [Fact]

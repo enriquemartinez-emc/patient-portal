@@ -1,5 +1,6 @@
 import Link from "next/link"
 
+import { Card } from "@/components/ui/card"
 import {
   Table,
   TableBody,
@@ -9,18 +10,12 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import type { LabResult } from "@/features/lab-results/types"
-import { LAB_CATEGORIES } from "@/features/lab-results/types"
+import { sortNewestFirst } from "@/features/lab-results/summary"
 import { formatDate } from "@/lib/format"
 
-// Results grouped by category in the fixed category order, leaving out empty categories.
-function groupByCategory(results: readonly LabResult[]) {
-  return LAB_CATEGORIES.map((category) => ({
-    category,
-    results: results.filter((result) => result.category === category),
-  })).filter((group) => group.results.length > 0)
-}
+import { CategoryBadge } from "./category-label"
 
-// Results grouped by category. Pass detailHref to make each test name a link.
+// Flat table of results sorted newest first. Pass detailHref to make each test name a link.
 export function LabResultsTable({
   results,
   detailHref,
@@ -28,59 +23,60 @@ export function LabResultsTable({
   results: readonly LabResult[]
   detailHref?: (result: LabResult) => string
 }) {
-  const groups = groupByCategory(results)
-
-  if (groups.length === 0) {
+  if (results.length === 0) {
     return <p className="text-muted-foreground">No lab results to show.</p>
   }
 
+  const sorted = sortNewestFirst(results)
+
   return (
-    <div className="flex flex-col gap-8">
-      {groups.map((group) => (
-        <section key={group.category} aria-labelledby={`cat-${group.category}`}>
-          <h2
-            id={`cat-${group.category}`}
-            className="mb-2 text-lg font-medium capitalize"
-          >
-            {group.category}
-          </h2>
-          <Table className="table-fixed">
-            <TableHeader>
-              <TableRow>
-                <TableHead>Test</TableHead>
-                <TableHead>Result</TableHead>
-                <TableHead>Collected</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {group.results.map((result) => (
-                <TableRow key={result.id}>
-                  <TableCell>
-                    {detailHref ? (
-                      <Link
-                        href={detailHref(result)}
-                        className="font-medium underline-offset-4 hover:underline"
-                      >
-                        {result.testName}
-                      </Link>
-                    ) : (
-                      result.testName
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {result.value} {result.unit}
-                  </TableCell>
-                  <TableCell>
-                    <time dateTime={result.collectedAt}>
-                      {formatDate(result.collectedAt)}
-                    </time>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </section>
-      ))}
-    </div>
+    <Card className="overflow-hidden py-0">
+      <Table className="table-fixed">
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-[38%] sm:w-[32%]">Test</TableHead>
+            <TableHead className="w-[37%] sm:w-[24%]">Category</TableHead>
+            <TableHead className="w-[25%] sm:w-[20%]">Result</TableHead>
+            <TableHead className="hidden sm:table-cell">Collected</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {sorted.map((result) => (
+            <TableRow key={result.id}>
+              <TableCell className="whitespace-normal">
+                {detailHref ? (
+                  <Link
+                    href={detailHref(result)}
+                    className="font-medium underline-offset-4 hover:underline"
+                  >
+                    {result.testName}
+                  </Link>
+                ) : (
+                  result.testName
+                )}
+                <time
+                  className="block text-xs text-muted-foreground sm:hidden"
+                  dateTime={result.collectedAt}
+                >
+                  {formatDate(result.collectedAt)}
+                </time>
+              </TableCell>
+              <TableCell className="px-1 whitespace-normal sm:px-2">
+                <CategoryBadge category={result.category} />
+              </TableCell>
+              <TableCell className="font-semibold tabular-nums">
+                {result.value}{" "}
+                <span className="text-muted-foreground">{result.unit}</span>
+              </TableCell>
+              <TableCell className="hidden sm:table-cell">
+                <time dateTime={result.collectedAt}>
+                  {formatDate(result.collectedAt)}
+                </time>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </Card>
   )
 }

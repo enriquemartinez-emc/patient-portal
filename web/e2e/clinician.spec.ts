@@ -20,7 +20,9 @@ test.describe("clinician", () => {
       "lipids",
       "endocrinology",
     ]) {
-      await expect(page.getByRole("heading", { name: category })).toBeVisible()
+      await expect(
+        page.getByRole("table").getByText(category).first()
+      ).toBeVisible()
     }
 
     await asPerson(browser, "emily.carter@demo.example", async (emily) => {
@@ -28,7 +30,7 @@ test.describe("clinician", () => {
       await expect(
         emily
           .getByText(
-            "Dr. Sarah Thompson (Northside Clinic) viewed 4 lab results."
+            "Dr. Sarah Thompson (Northside Clinic) viewed 26 lab results."
           )
           .first()
       ).toBeVisible()
@@ -42,7 +44,7 @@ test.describe("clinician", () => {
       await expect(
         emily
           .getByText(
-            "Dr. Sarah Thompson (Northside Clinic) viewed 4 lab results."
+            "Dr. Sarah Thompson (Northside Clinic) viewed 26 lab results."
           )
           .first()
       ).toBeVisible()
@@ -57,16 +59,11 @@ test.describe("clinician", () => {
 
     await page.getByRole("link", { name: "Emily Carter" }).click()
 
-    await expect(
-      page.getByRole("heading", { name: "hematology" })
-    ).toBeVisible()
-    await expect(page.getByRole("heading", { name: "lipids" })).toBeVisible()
-    await expect(
-      page.getByRole("heading", { name: "biochemistry" })
-    ).toHaveCount(0)
-    await expect(
-      page.getByRole("heading", { name: "endocrinology" })
-    ).toHaveCount(0)
+    const table = page.getByRole("table")
+    await expect(table.getByText("hematology").first()).toBeVisible()
+    await expect(table.getByText("lipids").first()).toBeVisible()
+    await expect(table.getByText("biochemistry")).toHaveCount(0)
+    await expect(table.getByText("endocrinology")).toHaveCount(0)
   })
 
   test("a patient who is not theirs is not found", async ({ page }) => {
