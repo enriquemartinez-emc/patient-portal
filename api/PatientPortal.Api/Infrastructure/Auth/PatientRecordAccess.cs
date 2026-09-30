@@ -1,79 +1,73 @@
 using Dapper;
-using Microsoft.AspNetCore.Authorization;
 using Npgsql;
 using PatientPortal.Api.Features.Consents;
 using PatientPortal.Core.Domain;
 
 namespace PatientPortal.Api.Infrastructure.Auth;
 
-public sealed class PatientRecordAccessRequirement : IAuthorizationRequirement
+// Who is asking to read a patient's record: a clinician or researcher, and the organization they act for.
+public sealed record RecordAccessor(ActorKind Kind, Guid ActorId, Guid OrganizationId);
+
+public abstract record AccessDecision
 {
-    public static readonly PatientRecordAccessRequirement Instance = new();
+    private protected AccessDecision() { }
 }
 
-// The resource carries the caller's open transaction: the checks lock the rows they rely on until
-// the read commits, so a revoke cannot slip in between the decision and the read.
-public sealed class PatientRecordResource(
-    ActorKind actor,
-    Guid organizationId,
-    Guid actorId,
-    Guid patientId,
-    NpgsqlConnection connection,
-    NpgsqlTransaction transaction,
-    CancellationToken cancellationToken
-)
-{
-    public ActorKind Actor { get; } = actor;
-    public Guid OrganizationId { get; } = organizationId;
-    public Guid ActorId { get; } = actorId;
-    public Guid PatientId { get; } = patientId;
-    public NpgsqlConnection Connection { get; } = connection;
-    public NpgsqlTransaction Transaction { get; } = transaction;
-    public CancellationToken CancellationToken { get; } = cancellationToken;
+public sealed record AccessGranted(IReadOnlyList<LabCategory> VisibleCategories) : AccessDecision;
 
-    public IReadOnlyList<LabCategory> VisibleCategories { get; set; } = [];
-}
+public sealed record AccessDenied : AccessDecision;
 
-public sealed class PatientRecordAccessHandler(TimeProvider time)
-    : AuthorizationHandler<PatientRecordAccessRequirement, PatientRecordResource>
+// Decides which of a patient's lab result categories an accessor may see: all of them for a
+// clinician with an active treatment relationship, otherwise the categories the patient's consents
+// grant the accessor's organization.
+//
+// It runs in the caller's open transaction: the rows it relies on stay locked until the read
+// commits, so a revoke cannot slip in between the decision and the read.
+public static class PatientRecordAccess
 {
-    protected override async Task HandleRequirementAsync(
-        AuthorizationHandlerContext context,
-        PatientRecordAccessRequirement requirement,
-        PatientRecordResource resource
+    public static async Task<AccessDecision> DecideAsync(
+        NpgsqlConnection connection,
+        NpgsqlTransaction transaction,
+        RecordAccessor accessor,
+        Guid patientId,
+        DateTimeOffset now,
+        CancellationToken ct
     )
     {
         var categories =
-            resource.Actor == ActorKind.Clinician && await IsTreatingAsync(resource)
+            accessor.Kind == ActorKind.Clinician
+            && await IsTreatingAsync(connection, transaction, accessor.ActorId, patientId, ct)
                 ? LabCategoryNames.All
                 : await ConsentCoverage.CoveredCategoriesAsync(
-                    resource.Connection,
-                    resource.Transaction,
-                    resource.PatientId,
-                    resource.OrganizationId,
-                    time.GetUtcNow(),
-                    resource.CancellationToken
+                    connection,
+                    transaction,
+                    patientId,
+                    accessor.OrganizationId,
+                    now,
+                    ct
                 );
 
-        if (categories.Count > 0)
-        {
-            resource.VisibleCategories = categories;
-            context.Succeed(requirement);
-        }
+        return categories.Count > 0 ? new AccessGranted(categories) : new AccessDenied();
     }
 
     // FOR SHARE keeps a concurrent "end treatment" from committing mid-read.
-    private static async Task<bool> IsTreatingAsync(PatientRecordResource resource) =>
-        await resource.Connection.QuerySingleOrDefaultAsync<Guid?>(
+    private static async Task<bool> IsTreatingAsync(
+        NpgsqlConnection connection,
+        NpgsqlTransaction transaction,
+        Guid clinicianId,
+        Guid patientId,
+        CancellationToken ct
+    ) =>
+        await connection.QuerySingleOrDefaultAsync<Guid?>(
             new CommandDefinition(
                 """
                 select id from treatment_relationships
-                where patient_id = @PatientId and clinician_id = @ActorId and ended_at is null
+                where patient_id = @patientId and clinician_id = @clinicianId and ended_at is null
                 for share
                 """,
-                new { resource.PatientId, resource.ActorId },
-                resource.Transaction,
-                cancellationToken: resource.CancellationToken
+                new { patientId, clinicianId },
+                transaction,
+                cancellationToken: ct
             )
         )
             is not null;

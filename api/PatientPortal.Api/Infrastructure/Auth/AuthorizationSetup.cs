@@ -23,7 +23,7 @@ public static class AuthorizationSetup
                 policy =>
                     policy
                         .RequireRole("patient")
-                        .AddRequirements(new ActingAsRequirement(ActorKind.Patient, "patientId"))
+                        .AddRequirements(new RouteActorRequirement(ActorKind.Patient, "patientId"))
             )
             .AddPolicy(
                 Policies.ClinicianActing,
@@ -31,7 +31,7 @@ public static class AuthorizationSetup
                     policy
                         .RequireRole("clinician")
                         .AddRequirements(
-                            new ActingAsRequirement(ActorKind.Clinician, "clinicianId")
+                            new RouteActorRequirement(ActorKind.Clinician, "clinicianId")
                         )
             )
             .AddPolicy(
@@ -40,14 +40,13 @@ public static class AuthorizationSetup
                     policy
                         .RequireRole("researcher")
                         .AddRequirements(
-                            new ActingAsRequirement(ActorKind.Researcher, "researcherId")
+                            new RouteActorRequirement(ActorKind.Researcher, "researcherId")
                         )
             )
             .AddPolicy(Policies.PatientOnly, policy => policy.RequireRole("patient"))
             .AddPolicy(Policies.AdminOnly, policy => policy.RequireRole("admin"));
 
-        services.AddSingleton<IAuthorizationHandler, ActingAsHandler>();
-        services.AddSingleton<IAuthorizationHandler, PatientRecordAccessHandler>();
+        services.AddSingleton<IAuthorizationHandler, RouteActorHandler>();
 
         return services;
     }

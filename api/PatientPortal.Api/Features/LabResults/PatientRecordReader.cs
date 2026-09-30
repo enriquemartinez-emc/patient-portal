@@ -1,6 +1,4 @@
-using System.Security.Claims;
 using Dapper;
-using Microsoft.AspNetCore.Authorization;
 using Npgsql;
 using PatientPortal.Api.Infrastructure.Auditing;
 using PatientPortal.Api.Infrastructure.Auth;
@@ -24,8 +22,6 @@ internal static class PatientRecordReader
 {
     public static Task<PatientRecordRead> ReadAsClinicianAsync(
         NpgsqlConnection connection,
-        ClaimsPrincipal user,
-        IAuthorizationService authorization,
         Guid clinicianId,
         Guid patientId,
         TimeProvider time,
@@ -33,8 +29,6 @@ internal static class PatientRecordReader
     ) =>
         ReadAsync(
             connection,
-            user,
-            authorization,
             ActorKind.Clinician,
             new ClinicianActor(new ClinicianId(clinicianId)),
             clinicianId,
@@ -45,8 +39,6 @@ internal static class PatientRecordReader
 
     public static Task<PatientRecordRead> ReadAsResearcherAsync(
         NpgsqlConnection connection,
-        ClaimsPrincipal user,
-        IAuthorizationService authorization,
         Guid researcherId,
         Guid patientId,
         TimeProvider time,
@@ -54,8 +46,6 @@ internal static class PatientRecordReader
     ) =>
         ReadAsync(
             connection,
-            user,
-            authorization,
             ActorKind.Researcher,
             new ResearcherActor(new ResearcherId(researcherId)),
             researcherId,
@@ -66,8 +56,6 @@ internal static class PatientRecordReader
 
     private static async Task<PatientRecordRead> ReadAsync(
         NpgsqlConnection connection,
-        ClaimsPrincipal user,
-        IAuthorizationService authorization,
         ActorKind kind,
         AuditActor actor,
         Guid actorId,
@@ -82,22 +70,16 @@ internal static class PatientRecordReader
 
         var organizationId = await OrganizationOfAsync(connection, transaction, kind, actorId, ct);
 
-        var resource = new PatientRecordResource(
-            kind,
-            organizationId,
-            actorId,
-            patientId,
+        var decision = await PatientRecordAccess.DecideAsync(
             connection,
             transaction,
+            new RecordAccessor(kind, actorId, organizationId),
+            patientId,
+            time.GetUtcNow(),
             ct
         );
-        var decision = await authorization.AuthorizeAsync(
-            user,
-            resource,
-            PatientRecordAccessRequirement.Instance
-        );
 
-        if (!decision.Succeeded)
+        if (decision is not AccessGranted granted)
         {
             // Ends the read, releasing its locks, then records the refusal on its own so that it is
             // kept even though the read is not.
@@ -120,7 +102,7 @@ internal static class PatientRecordReader
             connection,
             transaction,
             patientId,
-            resource.VisibleCategories,
+            granted.VisibleCategories,
             ct
         );
 

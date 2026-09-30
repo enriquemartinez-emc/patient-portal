@@ -4,24 +4,17 @@ using Npgsql;
 
 namespace PatientPortal.Api.Infrastructure.Auth;
 
-public enum ActorKind
-{
-    Patient,
-    Clinician,
-    Researcher,
-}
-
 // The caller must be the person named in the route (/patients/{patientId}, /clinicians/{clinicianId},
 // /researchers/{researcherId}), not just someone with the right role.
-public sealed record ActingAsRequirement(ActorKind Kind, string RouteKey)
+public sealed record RouteActorRequirement(ActorKind Kind, string RouteKey)
     : IAuthorizationRequirement;
 
-public sealed class ActingAsHandler(NpgsqlDataSource dataSource)
-    : AuthorizationHandler<ActingAsRequirement>
+public sealed class RouteActorHandler(NpgsqlDataSource dataSource)
+    : AuthorizationHandler<RouteActorRequirement>
 {
     protected override async Task HandleRequirementAsync(
         AuthorizationHandlerContext context,
-        ActingAsRequirement requirement
+        RouteActorRequirement requirement
     )
     {
         var subject = context.User.FindFirst("sub")?.Value;

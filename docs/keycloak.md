@@ -258,7 +258,7 @@ imports again; see the README). Changes made in the admin console are not writte
 | Sending the token to the API                             | `web/lib/api/server.ts`                                                          |
 | Redirect when there is no session cookie                 | `web/proxy.ts`                                                                   |
 | The API validating the token and reading roles           | `api/PatientPortal.Api/Infrastructure/Auth/AuthenticationSetup.cs`               |
-| Route rules: role plus "acting as" the person in the URL | `api/PatientPortal.Api/Infrastructure/Auth/AuthorizationSetup.cs`, `ActingAs.cs` |
+| Route rules: role plus being the person named in the URL | `api/PatientPortal.Api/Infrastructure/Auth/AuthorizationSetup.cs`, `RouteActorAuthorization.cs` |
 | Treatment and consent access to a patient's results      | `api/PatientPortal.Api/Infrastructure/Auth/PatientRecordAccess.cs`               |
 | Linking a login to a record                              | `api/PatientPortal.Api/Features/Me/GetMe.cs`                                     |
 
