@@ -10,8 +10,10 @@ also see.
 
 - **Frontend (BFF)**: Next.js (App Router), Functional Core / Imperative
   Shell split (`/core` pure, `/shell` I/O), shadcn/ui for components
-- **Backend API**: .NET 10 minimal API, FCIS (Core class library + Data.cs
-  - Handler orchestration — see `emc-fcis-feature-slice` skill)
+- **Backend API**: .NET 10 minimal API, FCIS (pure Core class library +
+  one use-case file per endpoint holding Request/Response, endpoint, handler
+  orchestration, SQL and file-scoped row DTOs — see `emc-fcis-feature-slice`
+  skill)
 - **Auth**: Keycloak (OIDC), Better-Auth on the
   Next.js side
 - **Database**: PostgreSQL 18
@@ -45,7 +47,8 @@ docker-compose.yml
 ## Available skills
 
 - `emc-fcis-feature-slice` — use for any .NET endpoint business
-  logic: Core/Data.cs/Handler split, immutable domain records
+  logic: pure Core plus use-case files (no Data/Mapper classes), immutable
+  domain records
 - `emc-pragmatic-type-driven-domain-modeling` — use when modeling new C# domain
   types, especially status/lifecycle fields (prefer sum types over
   enums/booleans for state)
