@@ -12,7 +12,12 @@ const auditEntryWireSchema = z.object({
   actorKind: z.enum(["patient", "clinician", "researcher"]),
   actorName: z.string(),
   actorOrganization: z.string().nullable(),
-  action: z.enum(["lab_results_read", "consent_granted", "consent_revoked"]),
+  action: z.enum([
+    "lab_results_read",
+    "consent_granted",
+    "consent_revoked",
+    "access_denied",
+  ]),
   labResultIds: z.array(z.guid()),
   consentGrantId: z.guid().nullable(),
 })
@@ -39,6 +44,13 @@ function toEntry(wire: AuditEntryWire): AuditEntry {
           type: "lab_results_read",
           labResultCount: wire.labResultIds.length,
         },
+      }
+    case "access_denied":
+      return {
+        id: wire.id,
+        occurredAt: wire.occurredAt,
+        actor,
+        action: { type: "access_denied" },
       }
     case "consent_granted":
     case "consent_revoked":

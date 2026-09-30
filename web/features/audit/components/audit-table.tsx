@@ -17,6 +17,7 @@ export const auditActionLabels: Record<AuditActionType, string> = {
   lab_results_read: "Lab results viewed",
   consent_granted: "Consent granted",
   consent_revoked: "Consent revoked",
+  access_denied: "Access refused",
 }
 
 function actorLabel(actor: AuditActor): string {
@@ -40,6 +41,8 @@ function describe(entry: AuditEntry): string {
       return `${who} granted a consent.`
     case "consent_revoked":
       return `${who} revoked a consent.`
+    case "access_denied":
+      return `${who} tried to view your lab results and was refused.`
   }
 }
 

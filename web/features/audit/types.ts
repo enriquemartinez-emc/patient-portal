@@ -6,6 +6,7 @@ export type AuditAction =
   | { type: "lab_results_read"; labResultCount: number }
   | { type: "consent_granted"; consentId: string }
   | { type: "consent_revoked"; consentId: string }
+  | { type: "access_denied" }
 
 export type AuditEntry = {
   id: string
@@ -18,6 +19,7 @@ export const AUDIT_ACTION_TYPES = [
   "lab_results_read",
   "consent_granted",
   "consent_revoked",
+  "access_denied",
 ] as const
 
 export type AuditActionType = (typeof AUDIT_ACTION_TYPES)[number]
