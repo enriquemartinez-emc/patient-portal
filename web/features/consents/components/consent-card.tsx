@@ -7,25 +7,42 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { canRevoke } from "@/core/consents/consents.rules"
-import type { Consent } from "@/core/consents/consents.types"
 import { revokeConsentAction } from "@/features/consents/actions"
 import { RevokeConsentDialog } from "@/features/consents/components/revoke-consent-dialog"
-import { describeConsent } from "@/features/consents/view"
-import { humanize } from "@/lib/format"
+import type { Consent } from "@/features/consents/types"
+import { formatDate } from "@/lib/format"
+
+const list = new Intl.ListFormat("en-GB", { type: "conjunction" })
+
+// What a consent means, in words a patient would use.
+function describe(consent: Consent): string {
+  const who = consent.granteeName
+  const what = list.format(consent.categories)
+
+  switch (consent.status) {
+    case "active":
+      return consent.expiry.kind === "never"
+        ? `${who} can view your ${what} results. This access does not expire.`
+        : `${who} can view your ${what} results until ${formatDate(consent.expiry.at)}.`
+    case "expired":
+      return `${who} could view your ${what} results until ${formatDate(consent.expiredAt)}. This access has expired.`
+    case "revoked":
+      return `${who} could view your ${what} results. You revoked this access on ${formatDate(consent.revokedAt)}.`
+  }
+}
 
 export function ConsentCard({ consent }: { consent: Consent }) {
   return (
     <Card>
       <CardHeader>
         <CardTitle>{consent.granteeName}</CardTitle>
-        <CardDescription>{describeConsent(consent)}</CardDescription>
+        <CardDescription>{describe(consent)}</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-3 text-sm">
         <div className="flex flex-wrap gap-2">
           {consent.categories.map((category) => (
-            <Badge key={category} variant="secondary">
-              {humanize(category)}
+            <Badge key={category} variant="secondary" className="capitalize">
+              {category}
             </Badge>
           ))}
         </div>
@@ -34,7 +51,7 @@ export function ConsentCard({ consent }: { consent: Consent }) {
           {consent.purpose}
         </p>
       </CardContent>
-      {canRevoke(consent) && (
+      {consent.status === "active" && (
         <CardFooter>
           <RevokeConsentDialog
             consentId={consent.id}

@@ -9,9 +9,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import type { ResearchParticipant } from "@/core/research/research.types"
+import type { ResearchParticipant } from "@/features/research/types"
 import { participantLabel } from "@/features/research/participant-label"
-import { humanize } from "@/lib/format"
 
 export function ParticipantsTable({
   participants,
@@ -51,8 +50,12 @@ export function ParticipantsTable({
             <TableCell>
               <div className="flex flex-wrap gap-2">
                 {participant.categories.map((category) => (
-                  <Badge key={category} variant="secondary">
-                    {humanize(category)}
+                  <Badge
+                    key={category}
+                    variant="secondary"
+                    className="capitalize"
+                  >
+                    {category}
                   </Badge>
                 ))}
               </div>

@@ -10,11 +10,10 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { Textarea } from "@/components/ui/textarea"
-import { earliestExpiryDate } from "@/core/consents/consents.rules"
-import type { Organization } from "@/core/consents/consents.types"
-import { LAB_CATEGORIES } from "@/core/lab-results/lab-results.types"
+import type { Organization } from "@/features/consents/types"
+import { LAB_CATEGORIES } from "@/features/lab-results/types"
 import { grantConsentAction } from "@/features/consents/actions"
-import { humanize } from "@/lib/format"
+import { earliestExpiryDate } from "@/features/consents/expiry"
 
 export function GrantConsentForm({
   organizations,
@@ -50,7 +49,11 @@ export function GrantConsentForm({
                   key={organization.id}
                   value={organization.id}
                 >
-                  {organization.name} ({humanize(organization.kind)})
+                  {organization.name} (
+                  {organization.kind === "clinic"
+                    ? "Clinic"
+                    : "Research institution"}
+                  )
                 </NativeSelectOption>
               ))}
             </NativeSelect>
@@ -72,7 +75,7 @@ export function GrantConsentForm({
                     value={category}
                     className="size-4 accent-primary"
                   />
-                  {humanize(category)}
+                  <span className="capitalize">{category}</span>
                 </label>
               ))}
             </div>

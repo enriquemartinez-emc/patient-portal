@@ -2,9 +2,9 @@ import "server-only"
 
 import { z } from "zod"
 
-import type { Consent, Organization } from "@/core/consents/consents.types"
+import type { Consent, Organization } from "@/features/consents/types"
 import { apiDelete, apiGet, apiPost } from "@/lib/api/server"
-import { categoriesSchema } from "@/lib/api/schemas"
+import { categoriesSchema } from "@/features/lab-results/schemas"
 
 const consentWireSchema = z.object({
   id: z.guid(),

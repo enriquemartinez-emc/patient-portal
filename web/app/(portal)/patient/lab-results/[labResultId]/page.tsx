@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { requireSessionPage } from "@/features/auth/session"
 import { getLabResult } from "@/features/lab-results/repository"
-import { formatDateTime, humanize } from "@/lib/format"
+import { formatDateTime } from "@/lib/format"
 
 export const metadata = { title: "Lab result · Patient Portal" }
 
@@ -33,7 +33,9 @@ export default async function LabResultPage({
         <CardHeader>
           <CardTitle className="flex items-center gap-3 text-xl">
             {result.testName}
-            <Badge variant="secondary">{humanize(result.category)}</Badge>
+            <Badge variant="secondary" className="capitalize">
+              {result.category}
+            </Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>

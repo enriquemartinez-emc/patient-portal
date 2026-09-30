@@ -9,8 +9,8 @@ also see.
 ## Tech stack
 
 - **Frontend (BFF)**: Next.js (App Router), Functional Core / Imperative
-  Shell split (`core/` pure, `features/` shell — see
-  `emc-fcis-nextjs-feature-slice` skill), shadcn/ui for components
+  Shell split (see `emc-fcis-nextjs-feature-slice` skill), shadcn/ui for
+  components
 - **Backend API**: .NET 10 minimal API, FCIS (pure Core class library +
   use-case files, no Data/Mapper classes — see `emc-fcis-feature-slice` skill)
 - **Auth**: Keycloak (OIDC), Better-Auth on the

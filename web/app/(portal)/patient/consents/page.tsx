@@ -1,10 +1,10 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import type { Consent } from "@/core/consents/consents.types"
+import type { Consent } from "@/features/consents/types"
 import { requireSessionPage } from "@/features/auth/session"
+import { consentFormErrors } from "@/features/consents/form-errors"
 import { ConsentCard } from "@/features/consents/components/consent-card"
 import { GrantConsentForm } from "@/features/consents/components/grant-consent-form"
 import { listConsents, listOrganizations } from "@/features/consents/repository"
-import { formErrorMessage, groupByStatus } from "@/features/consents/view"
 
 export const metadata = { title: "Consents · Patient Portal" }
 
@@ -44,8 +44,10 @@ export default async function ConsentsPage({
     listConsents(session.patientId),
     listOrganizations(),
   ])
-  const groups = groupByStatus(consents)
-  const errorMessage = formErrorMessage(error)
+  const errorMessage =
+    error && Object.hasOwn(consentFormErrors, error)
+      ? consentFormErrors[error as keyof typeof consentFormErrors]
+      : undefined
 
   return (
     <div className="flex flex-col gap-8">
@@ -82,17 +84,17 @@ export default async function ConsentsPage({
         <div className="flex flex-col gap-8">
           <ConsentSection
             title="Active"
-            consents={groups.active}
+            consents={consents.filter((c) => c.status === "active")}
             emptyText="You are not sharing your results with anyone."
           />
           <ConsentSection
             title="Expired"
-            consents={groups.expired}
+            consents={consents.filter((c) => c.status === "expired")}
             emptyText="No consents have expired."
           />
           <ConsentSection
             title="Revoked"
-            consents={groups.revoked}
+            consents={consents.filter((c) => c.status === "revoked")}
             emptyText="You haven't revoked any consents."
           />
         </div>

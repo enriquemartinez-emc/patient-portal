@@ -2,7 +2,7 @@ import { PaginationNav } from "@/components/pagination-nav"
 import { requireSessionPage } from "@/features/auth/session"
 import { PatientsTable } from "@/features/patients/components/patients-table"
 import { listMyPatients } from "@/features/patients/repository"
-import { parsePageNumber } from "@/lib/query"
+import { pageParam } from "@/lib/query"
 
 export const metadata = { title: "Patients · Patient Portal" }
 
@@ -12,7 +12,7 @@ export default async function ClinicianPatientsPage({
   searchParams: Promise<{ page?: string }>
 }) {
   const session = await requireSessionPage("clinician")
-  const page = parsePageNumber((await searchParams).page)
+  const page = pageParam.parse((await searchParams).page)
   const patients = await listMyPatients(session.clinicianId, page)
 
   return (

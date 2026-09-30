@@ -1,8 +1,11 @@
 import "server-only"
 
-import type { LabResult } from "@/core/lab-results/lab-results.types"
+import type { LabResult } from "@/features/lab-results/types"
 import { apiGet, isNotFound } from "@/lib/api/server"
-import { labResultSchema, labResultsResponseSchema } from "@/lib/api/schemas"
+import {
+  labResultSchema,
+  labResultsResponseSchema,
+} from "@/features/lab-results/schemas"
 
 export async function listLabResults(patientId: string): Promise<LabResult[]> {
   const { items } = await apiGet(

@@ -8,9 +8,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import type { LabResult } from "@/core/lab-results/lab-results.types"
-import { LAB_CATEGORIES } from "@/core/lab-results/lab-results.types"
-import { formatDate, humanize } from "@/lib/format"
+import type { LabResult } from "@/features/lab-results/types"
+import { LAB_CATEGORIES } from "@/features/lab-results/types"
+import { formatDate } from "@/lib/format"
 
 // Results grouped by category in the fixed category order, leaving out empty categories.
 function groupByCategory(results: readonly LabResult[]) {
@@ -38,8 +38,11 @@ export function LabResultsTable({
     <div className="flex flex-col gap-8">
       {groups.map((group) => (
         <section key={group.category} aria-labelledby={`cat-${group.category}`}>
-          <h2 id={`cat-${group.category}`} className="mb-2 text-lg font-medium">
-            {humanize(group.category)}
+          <h2
+            id={`cat-${group.category}`}
+            className="mb-2 text-lg font-medium capitalize"
+          >
+            {group.category}
           </h2>
           <Table>
             <TableHeader>

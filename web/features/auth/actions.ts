@@ -4,7 +4,6 @@ import { redirect } from "next/navigation"
 import { z } from "zod"
 
 import { authenticateDemoAccount } from "@/features/auth/demo-accounts"
-import { homePathFor } from "@/features/auth/navigation"
 import {
   clearSession,
   isDemoAuthEnabled,
@@ -26,15 +25,15 @@ export async function signInAction(formData: FormData): Promise<void> {
     email: formData.get("email"),
     password: formData.get("password"),
   })
-  const session = parsed.success
+  const account = parsed.success
     ? authenticateDemoAccount(parsed.data.email, parsed.data.password)
     : undefined
-  if (!session) {
+  if (!account) {
     redirect("/login?error=invalid")
   }
 
-  await writeSession(session)
-  redirect(homePathFor(session))
+  await writeSession(account.email)
+  redirect(`/${account.session.kind}`)
 }
 
 export async function signOutAction(): Promise<void> {

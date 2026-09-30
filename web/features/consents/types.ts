@@ -1,4 +1,4 @@
-import type { LabCategory } from "@/core/lab-results/lab-results.types"
+import type { LabCategory } from "@/features/lab-results/types"
 
 export type ConsentExpiry = { kind: "never" } | { kind: "on"; at: string }
 

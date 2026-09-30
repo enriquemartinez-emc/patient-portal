@@ -1,4 +1,4 @@
-import type { AccessBasis } from "@/core/patients/patients.types"
+import type { AccessBasis } from "@/features/patients/types"
 
 export const accessBasisLabels: Record<AccessBasis, string> = {
   treatment: "You treat this patient",

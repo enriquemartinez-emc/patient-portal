@@ -4,12 +4,11 @@ import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { cache } from "react"
 
-import { homePathFor } from "@/features/auth/navigation"
-import type { Session, SessionKind } from "@/core/auth/auth.types"
-import { findSessionById, sessionId } from "@/features/auth/demo-accounts"
+import type { Session, SessionKind } from "@/features/auth/types"
+import { findDemoAccount } from "@/features/auth/demo-accounts"
 import { SESSION_COOKIE } from "@/features/auth/session-cookie"
 
-// Demo authentication: the session cookie names one of the demo accounts. This module is the
+// Demo authentication: the session cookie holds the email of a demo account. This module is the
 // single place the rest of the app learns who is signed in; real authentication replaces it.
 export function isDemoAuthEnabled(): boolean {
   return process.env.ENABLE_DEMO_AUTH === "true"
@@ -23,8 +22,8 @@ export const getSession = cache(async (): Promise<Session | null> => {
   if (!isDemoAuthEnabled()) {
     return null
   }
-  const id = store.get(SESSION_COOKIE)?.value
-  return (id && findSessionById(id)) || null
+  const email = store.get(SESSION_COOKIE)?.value
+  return (email && findDemoAccount(email)?.session) || null
 })
 
 // For Server Actions: fails the request when nobody is signed in. Every action that changes
@@ -49,13 +48,13 @@ export async function requireSessionPage(kind?: SessionKind): Promise<Session> {
     redirect("/login")
   }
   if (kind && session.kind !== kind) {
-    redirect(homePathFor(session))
+    redirect(`/${session.kind}`)
   }
   return session
 }
 
-export async function writeSession(session: Session): Promise<void> {
-  ;(await cookies()).set(SESSION_COOKIE, sessionId(session), {
+export async function writeSession(email: string): Promise<void> {
+  ;(await cookies()).set(SESSION_COOKIE, email, {
     httpOnly: true,
     sameSite: "lax",
     path: "/",

@@ -2,7 +2,7 @@ import "server-only"
 
 import { createHash, timingSafeEqual } from "node:crypto"
 
-import type { Session } from "@/core/auth/auth.types"
+import type { Session } from "@/features/auth/types"
 
 // Demo sign-in data: the people created by the API's dev seed
 // (api/PatientPortal.Migrations/Scripts/DevSeed), each with an email to sign in with. All demo
@@ -57,31 +57,19 @@ export const demoAccounts: readonly DemoAccount[] = [
   },
 ]
 
-export function sessionId(session: Session): string {
-  switch (session.kind) {
-    case "patient":
-      return session.patientId
-    case "clinician":
-      return session.clinicianId
-    case "researcher":
-      return session.researcherId
-  }
+export function findDemoAccount(email: string): DemoAccount | undefined {
+  return demoAccounts.find(
+    (account) => account.email === email.trim().toLowerCase()
+  )
 }
 
-export function findSessionById(id: string): Session | undefined {
-  return demoAccounts.find((account) => sessionId(account.session) === id)
-    ?.session
-}
-
-// Returns the session for a matching email and password, otherwise undefined.
+// Returns the account for a matching email and password, otherwise undefined.
 export function authenticateDemoAccount(
   email: string,
   password: string
-): Session | undefined {
-  const account = demoAccounts.find(
-    (candidate) => candidate.email === email.trim().toLowerCase()
-  )
-  return account && passwordMatches(password) ? account.session : undefined
+): DemoAccount | undefined {
+  const account = findDemoAccount(email)
+  return account && passwordMatches(password) ? account : undefined
 }
 
 // Hashing first gives both sides the same length, which timingSafeEqual requires.

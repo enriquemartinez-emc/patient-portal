@@ -1,11 +1,10 @@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import type { Session } from "@/core/auth/auth.types"
+import type { Session } from "@/features/auth/types"
 import { signOutAction } from "@/features/auth/actions"
 import { MainNav } from "@/features/auth/components/main-nav"
-import { navigationFor } from "@/features/auth/navigation"
-import { humanize } from "@/lib/format"
+import { navigation } from "@/features/auth/navigation"
 
 export function PortalShell({
   session,
@@ -25,9 +24,11 @@ export function PortalShell({
       <header className="border-b">
         <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center gap-x-6 gap-y-3 px-6 py-3">
           <span className="font-semibold">Patient Portal</span>
-          <MainNav items={navigationFor(session)} />
+          <MainNav items={navigation[session.kind]} />
           <div className="flex items-center gap-3 text-sm">
-            <Badge variant="secondary">{humanize(session.kind)}</Badge>
+            <Badge variant="secondary" className="capitalize">
+              {session.kind}
+            </Badge>
             <span>{session.name}</span>
             <Separator orientation="vertical" className="h-5" />
             <form action={signOutAction}>

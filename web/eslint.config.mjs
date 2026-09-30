@@ -5,36 +5,6 @@ import nextTs from "eslint-config-next/typescript";
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
-  // core/ is the pure functional core: no framework, no I/O, no other layer.
-  {
-    files: ["core/**/*.{ts,tsx}"],
-    rules: {
-      "no-restricted-imports": [
-        "error",
-        {
-          patterns: [
-            {
-              group: [
-                "@/app/*",
-                "@/features/*",
-                "@/components/*",
-                "@/lib/*",
-                "**/app/**",
-                "**/features/**",
-                "react",
-                "react-dom",
-                "next",
-                "next/*",
-                "zod",
-              ],
-              message:
-                "core/ must stay pure: no framework, I/O or imports from other layers.",
-            },
-          ],
-        },
-      ],
-    },
-  },
   // BFF: only lib/api may make HTTP calls, and it is `server-only`.
   {
     files: ["**/*.{ts,tsx}"],

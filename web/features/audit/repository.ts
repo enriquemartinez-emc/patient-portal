@@ -2,7 +2,7 @@ import "server-only"
 
 import { z } from "zod"
 
-import type { AuditActionType, AuditEntry } from "@/core/audit/audit.types"
+import type { AuditActionType, AuditEntry } from "@/features/audit/types"
 import { apiGet } from "@/lib/api/server"
 import { pagedSchema, type Paged } from "@/lib/api/schemas"
 

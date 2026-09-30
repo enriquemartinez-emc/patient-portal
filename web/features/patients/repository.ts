@@ -2,14 +2,11 @@ import "server-only"
 
 import { z } from "zod"
 
-import type { LabResult } from "@/core/lab-results/lab-results.types"
-import type { PatientSummary } from "@/core/patients/patients.types"
+import type { LabResult } from "@/features/lab-results/types"
+import type { PatientSummary } from "@/features/patients/types"
 import { apiGet, isNotFound } from "@/lib/api/server"
-import {
-  labResultsResponseSchema,
-  pagedSchema,
-  type Paged,
-} from "@/lib/api/schemas"
+import { labResultsResponseSchema } from "@/features/lab-results/schemas"
+import { pagedSchema, type Paged } from "@/lib/api/schemas"
 
 const patientSummarySchema = z.object({
   id: z.guid(),

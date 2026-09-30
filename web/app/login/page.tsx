@@ -12,9 +12,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { signInAction } from "@/features/auth/actions"
 import { DEMO_PASSWORD, demoAccounts } from "@/features/auth/demo-accounts"
-import { homePathFor } from "@/features/auth/navigation"
 import { getSession, isDemoAuthEnabled } from "@/features/auth/session"
-import { humanize } from "@/lib/format"
 
 export default async function LoginPage({
   searchParams,
@@ -26,7 +24,7 @@ export default async function LoginPage({
     notFound()
   }
   if (session) {
-    redirect(homePathFor(session))
+    redirect(`/${session.kind}`)
   }
 
   const { error } = await searchParams
@@ -90,7 +88,8 @@ export default async function LoginPage({
               <li key={account.email} className="flex flex-col">
                 <span className="font-mono">{account.email}</span>
                 <span className="text-muted-foreground">
-                  {account.session.name} · {humanize(account.session.kind)}
+                  {account.session.name} ·{" "}
+                  <span className="capitalize">{account.session.kind}</span>
                 </span>
               </li>
             ))}

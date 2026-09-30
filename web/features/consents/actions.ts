@@ -4,14 +4,11 @@ import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { z } from "zod"
 
-import {
-  expiryInstant,
-  isValidExpiryDate,
-} from "@/core/consents/consents.rules"
-import { LAB_CATEGORIES } from "@/core/lab-results/lab-results.types"
+import { LAB_CATEGORIES } from "@/features/lab-results/types"
 import { requireSession } from "@/features/auth/session"
 import { grantConsent, revokeConsent } from "@/features/consents/repository"
-import type { ConsentFormError } from "@/features/consents/view"
+import { earliestExpiryDate } from "@/features/consents/expiry"
+import type { ConsentFormError } from "@/features/consents/form-errors"
 import { ApiError } from "@/lib/api/server"
 
 const CONSENTS_PATH = "/patient/consents"
@@ -54,7 +51,7 @@ export async function grantConsentAction(formData: FormData): Promise<void> {
   }
 
   const { organizationId, categories, purpose, expiresOn } = parsed.data
-  if (expiresOn !== "" && !isValidExpiryDate(expiresOn, new Date())) {
+  if (expiresOn !== "" && expiresOn < earliestExpiryDate(new Date())) {
     redirect(`${CONSENTS_PATH}?error=expiry`)
   }
 
@@ -64,7 +61,8 @@ export async function grantConsentAction(formData: FormData): Promise<void> {
       granteeOrganizationId: organizationId,
       categories,
       purpose,
-      expiresAt: expiresOn === "" ? undefined : expiryInstant(expiresOn),
+      // A chosen date is the end of that day, so access lasts through it.
+      expiresAt: expiresOn === "" ? undefined : `${expiresOn}T23:59:59Z`,
     })
   } catch (error) {
     if (!(error instanceof ApiError) || error.status >= 500) {

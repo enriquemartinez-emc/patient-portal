@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
-import { isCurrentPath, type NavItem } from "@/features/auth/navigation"
+import type { NavItem } from "@/features/auth/navigation"
 
 export function MainNav({ items }: { items: readonly NavItem[] }) {
   const pathname = usePathname()
@@ -14,7 +14,9 @@ export function MainNav({ items }: { items: readonly NavItem[] }) {
       className="flex flex-1 flex-wrap items-center gap-4 text-sm"
     >
       {items.map((item) => {
-        const current = isCurrentPath(item, pathname)
+        const current =
+          pathname === item.href ||
+          item.activeOn.some((path) => pathname.startsWith(path))
         return (
           <Link
             key={item.href}

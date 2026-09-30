@@ -1,13 +1,15 @@
+import { z } from "zod"
+
 import { PaginationNav } from "@/components/pagination-nav"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
-import { AUDIT_ACTION_TYPES } from "@/core/audit/audit.types"
+import { AUDIT_ACTION_TYPES } from "@/features/audit/types"
 import { AuditTable } from "@/features/audit/components/audit-table"
 import { listAuditTrail } from "@/features/audit/repository"
+import { auditActionLabels } from "@/features/audit/components/audit-table"
 import { requireSessionPage } from "@/features/auth/session"
-import { auditActionLabels } from "@/features/audit/view"
-import { parseOneOf, parsePageNumber } from "@/lib/query"
+import { pageParam } from "@/lib/query"
 
 export const metadata = { title: "Access history · Patient Portal" }
 
@@ -18,8 +20,12 @@ export default async function AccessHistoryPage({
 }) {
   const session = await requireSessionPage("patient")
   const params = await searchParams
-  const page = parsePageNumber(params.page)
-  const action = parseOneOf(params.action, AUDIT_ACTION_TYPES)
+  const page = pageParam.parse(params.page)
+  const action = z
+    .enum(AUDIT_ACTION_TYPES)
+    .optional()
+    .catch(undefined)
+    .parse(params.action)
 
   const trail = await listAuditTrail(session.patientId, { page, action })
 

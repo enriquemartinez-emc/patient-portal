@@ -2,7 +2,7 @@ import { PaginationNav } from "@/components/pagination-nav"
 import { requireSessionPage } from "@/features/auth/session"
 import { ParticipantsTable } from "@/features/research/components/participants-table"
 import { listParticipants } from "@/features/research/repository"
-import { parsePageNumber } from "@/lib/query"
+import { pageParam } from "@/lib/query"
 
 export const metadata = { title: "Participants · Patient Portal" }
 
@@ -12,7 +12,7 @@ export default async function ResearcherParticipantsPage({
   searchParams: Promise<{ page?: string }>
 }) {
   const session = await requireSessionPage("researcher")
-  const page = parsePageNumber((await searchParams).page)
+  const page = pageParam.parse((await searchParams).page)
   const participants = await listParticipants(session.researcherId, page)
 
   return (

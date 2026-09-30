@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import type { PatientSummary } from "@/core/patients/patients.types"
+import type { PatientSummary } from "@/features/patients/types"
 import { accessBasisLabels } from "@/features/patients/labels"
 import { formatDate } from "@/lib/format"
 

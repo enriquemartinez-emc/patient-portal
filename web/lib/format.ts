@@ -17,17 +17,3 @@ export function formatDate(iso: string): string {
 export function formatDateTime(iso: string): string {
   return `${dateTimeFormat.format(new Date(iso))} UTC`
 }
-
-// "a", "a and b", "a, b and c".
-export function joinWithAnd(items: readonly string[]): string {
-  if (items.length <= 1) {
-    return items.join("")
-  }
-  return `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}`
-}
-
-// "research_institution" -> "Research institution".
-export function humanize(value: string): string {
-  const spaced = value.replaceAll("_", " ")
-  return spaced.charAt(0).toUpperCase() + spaced.slice(1)
-}
