@@ -77,13 +77,4 @@ public sealed class ConsentTests
         var expired = Assert.IsType<ExpiredConsent>(result);
         Assert.Equal(expiry, expired.ExpiredAt);
     }
-
-    [Theory]
-    [InlineData(LabCategory.Hematology, true)]
-    [InlineData(LabCategory.Lipids, true)]
-    [InlineData(LabCategory.Microbiology, false)]
-    public void A_scope_covers_only_the_categories_it_names(LabCategory category, bool expected)
-    {
-        Assert.Equal(expected, ConsentRules.Covers(TestData.Scope, category));
-    }
 }

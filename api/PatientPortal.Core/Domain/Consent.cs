@@ -114,9 +114,6 @@ public static class ConsentRules
             _ => consent,
         };
 
-    public static bool Covers(ConsentScope scope, LabCategory category) =>
-        scope.First == category || scope.Rest.Contains(category);
-
     // The lab categories a set of consents makes visible: the union of the scopes of those in
     // effect. Revoked and expired consents contribute nothing.
     public static IReadOnlyList<LabCategory> CoveredCategories(
