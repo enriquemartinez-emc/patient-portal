@@ -23,13 +23,13 @@ From your machine you can reach the web app (3000), Keycloak (8080) and Postgres
 Open <http://localhost:3000> and choose **Sign in**. You sign in on the Keycloak page with one of the demo accounts
 below (the sign-in page lists them too). They all use the password `demo-password`.
 
-| Account | Role | What they can do |
-| --- | --- | --- |
-| `emily.carter@demo.example` | Patient | Has 26 lab results over four blood draws. Shares hematology and lipids with Riverside Clinic. |
-| `james.wilson@demo.example` | Patient | Has 19 lab results over four blood draws. Shares biochemistry with Meridian Research Institute. |
-| `sarah.thompson@demo.example` | Clinician, Northside Clinic | Treats Emily, so sees all her results. |
-| `michael.brown@demo.example` | Clinician, Riverside Clinic | Treats James. Sees only what Emily shared with his clinic. |
-| `laura.davies@demo.example` | Researcher, Meridian Research Institute | Sees James as an anonymous participant, biochemistry only. |
+| Account                       | Role                                    | What they can do                                                                                |
+| ----------------------------- | --------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `emily.carter@demo.example`   | Patient                                 | Has 26 lab results over four blood draws. Shares hematology and lipids with Riverside Clinic.   |
+| `james.wilson@demo.example`   | Patient                                 | Has 19 lab results over four blood draws. Shares biochemistry with Meridian Research Institute. |
+| `sarah.thompson@demo.example` | Clinician, Northside Clinic             | Treats Emily, so sees all her results.                                                          |
+| `michael.brown@demo.example`  | Clinician, Riverside Clinic             | Treats James. Sees only what Emily shared with his clinic.                                      |
+| `laura.davies@demo.example`   | Researcher, Meridian Research Institute | Sees James as an anonymous participant, biochemistry only.                                      |
 
 ### A tour
 
@@ -109,7 +109,3 @@ cd web && pnpm exec playwright install chromium && pnpm test:e2e   # browser jou
 - [0001 Core architecture decisions](docs/adr/0001-architecture-decisions.md)
 - [0002 Schema and database roles](docs/adr/0002-schema-and-database-roles.md)
 - [0003 Authentication and authorization](docs/adr/0003-authentication-and-authorization.md)
-
-## Guides
-
-- [Keycloak in the Patient Portal](docs/keycloak.md): how sign-in works, written for someone new to Keycloak
