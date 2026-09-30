@@ -56,7 +56,7 @@ docker-compose.yml
   HTTP contracts, validation, OpenAPI, or resource creation responses
 - `neon-postgres` - use when working with postgresql
 - `vercel-react-best-practices` - use when working with Nextjs
-- `shadcn` - use when using shadcn ui components, use the latest haiku model to work with this skill.
+- `shadcn` - use when using shadcn ui components, use Sonnet 5.5 at low effort to work with this skill.
 
 ## Known gotchas
 
