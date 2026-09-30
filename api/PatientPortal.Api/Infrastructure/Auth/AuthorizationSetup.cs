@@ -15,20 +15,17 @@ public static class AuthorizationSetup
 {
     public static IServiceCollection AddPortalAuthorization(this IServiceCollection services)
     {
-        services.AddAuthorization(options =>
-        {
-            options.FallbackPolicy = new AuthorizationPolicyBuilder()
-                .RequireAuthenticatedUser()
-                .Build();
-
-            options.AddPolicy(
+        services
+            .AddAuthorizationBuilder()
+            .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build())
+            .AddPolicy(
                 Policies.PatientActing,
                 policy =>
                     policy
                         .RequireRole("patient")
                         .AddRequirements(new ActingAsRequirement(ActorKind.Patient, "patientId"))
-            );
-            options.AddPolicy(
+            )
+            .AddPolicy(
                 Policies.ClinicianActing,
                 policy =>
                     policy
@@ -36,8 +33,8 @@ public static class AuthorizationSetup
                         .AddRequirements(
                             new ActingAsRequirement(ActorKind.Clinician, "clinicianId")
                         )
-            );
-            options.AddPolicy(
+            )
+            .AddPolicy(
                 Policies.ResearcherActing,
                 policy =>
                     policy
@@ -45,10 +42,9 @@ public static class AuthorizationSetup
                         .AddRequirements(
                             new ActingAsRequirement(ActorKind.Researcher, "researcherId")
                         )
-            );
-            options.AddPolicy(Policies.PatientOnly, policy => policy.RequireRole("patient"));
-            options.AddPolicy(Policies.AdminOnly, policy => policy.RequireRole("admin"));
-        });
+            )
+            .AddPolicy(Policies.PatientOnly, policy => policy.RequireRole("patient"))
+            .AddPolicy(Policies.AdminOnly, policy => policy.RequireRole("admin"));
 
         services.AddSingleton<IAuthorizationHandler, ActingAsHandler>();
         services.AddSingleton<IAuthorizationHandler, PatientRecordAccessHandler>();
