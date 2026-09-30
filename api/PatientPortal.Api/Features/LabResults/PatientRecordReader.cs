@@ -82,7 +82,7 @@ internal static class PatientRecordReader
 
         var organizationId = await OrganizationOfAsync(connection, transaction, kind, actorId, ct);
 
-        var request = new PatientRecordRequest(
+        var resource = new PatientRecordResource(
             kind,
             organizationId,
             actorId,
@@ -93,7 +93,7 @@ internal static class PatientRecordReader
         );
         var decision = await authorization.AuthorizeAsync(
             user,
-            request,
+            resource,
             PatientRecordAccessRequirement.Instance
         );
 
@@ -120,7 +120,7 @@ internal static class PatientRecordReader
             connection,
             transaction,
             patientId,
-            request.VisibleCategories,
+            resource.VisibleCategories,
             ct
         );
 

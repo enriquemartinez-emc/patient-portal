@@ -11,9 +11,9 @@ public sealed class PatientRecordAccessRequirement : IAuthorizationRequirement
     public static readonly PatientRecordAccessRequirement Instance = new();
 }
 
-// The request carries the caller's open transaction: the checks lock the rows they rely on until
+// The resource carries the caller's open transaction: the checks lock the rows they rely on until
 // the read commits, so a revoke cannot slip in between the decision and the read.
-public sealed class PatientRecordRequest(
+public sealed class PatientRecordResource(
     ActorKind actor,
     Guid organizationId,
     Guid actorId,
@@ -35,45 +35,45 @@ public sealed class PatientRecordRequest(
 }
 
 public sealed class PatientRecordAccessHandler(TimeProvider time)
-    : AuthorizationHandler<PatientRecordAccessRequirement, PatientRecordRequest>
+    : AuthorizationHandler<PatientRecordAccessRequirement, PatientRecordResource>
 {
     protected override async Task HandleRequirementAsync(
         AuthorizationHandlerContext context,
         PatientRecordAccessRequirement requirement,
-        PatientRecordRequest request
+        PatientRecordResource resource
     )
     {
         var categories =
-            request.Actor == ActorKind.Clinician && await IsTreatingAsync(request)
+            resource.Actor == ActorKind.Clinician && await IsTreatingAsync(resource)
                 ? LabCategoryNames.All
                 : await ConsentCoverage.CoveredCategoriesAsync(
-                    request.Connection,
-                    request.Transaction,
-                    request.PatientId,
-                    request.OrganizationId,
+                    resource.Connection,
+                    resource.Transaction,
+                    resource.PatientId,
+                    resource.OrganizationId,
                     time.GetUtcNow(),
-                    request.CancellationToken
+                    resource.CancellationToken
                 );
 
         if (categories.Count > 0)
         {
-            request.VisibleCategories = categories;
+            resource.VisibleCategories = categories;
             context.Succeed(requirement);
         }
     }
 
     // FOR SHARE keeps a concurrent "end treatment" from committing mid-read.
-    private static async Task<bool> IsTreatingAsync(PatientRecordRequest request) =>
-        await request.Connection.QuerySingleOrDefaultAsync<Guid?>(
+    private static async Task<bool> IsTreatingAsync(PatientRecordResource resource) =>
+        await resource.Connection.QuerySingleOrDefaultAsync<Guid?>(
             new CommandDefinition(
                 """
                 select id from treatment_relationships
                 where patient_id = @PatientId and clinician_id = @ActorId and ended_at is null
                 for share
                 """,
-                new { request.PatientId, request.ActorId },
-                request.Transaction,
-                cancellationToken: request.CancellationToken
+                new { resource.PatientId, resource.ActorId },
+                resource.Transaction,
+                cancellationToken: resource.CancellationToken
             )
         )
             is not null;
