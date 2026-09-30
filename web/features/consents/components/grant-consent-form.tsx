@@ -6,7 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
+import { DatePicker } from "@/components/date-picker"
 import { Label } from "@/components/ui/label"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { Textarea } from "@/components/ui/textarea"
@@ -93,13 +93,14 @@ export function GrantConsentForm({
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="expiresOn">Stop sharing on (optional)</Label>
-            <Input
+            <Label id="expiresOn-label" htmlFor="expiresOn">
+              Stop sharing on (optional)
+            </Label>
+            <DatePicker
               id="expiresOn"
               name="expiresOn"
-              type="date"
               min={earliestExpiryDate(now)}
-              className="w-fit"
+              aria-labelledby="expiresOn-label expiresOn"
             />
             <p className="text-xs text-muted-foreground">
               Leave empty to keep sharing until you stop it.

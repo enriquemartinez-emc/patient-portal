@@ -37,9 +37,3 @@ export async function asPerson<T>(
     await context.close()
   }
 }
-
-export function daysAhead(days: number): string {
-  const date = new Date()
-  date.setUTCDate(date.getUTCDate() + days)
-  return date.toISOString().slice(0, 10)
-}

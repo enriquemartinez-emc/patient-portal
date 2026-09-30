@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test"
 
-import { daysAhead, signIn } from "./support"
+import { signIn } from "./support"
 
 test.describe("patient", () => {
   test("sees an overview of results, sharing and access on the dashboard", async ({
@@ -81,7 +81,12 @@ test.describe("patient", () => {
     })
     await page.getByLabel("lipids").check()
     await page.getByLabel("Why are you sharing?").fill(purpose)
-    await page.getByLabel(/Stop sharing on/).fill(daysAhead(30))
+    await page.getByRole("button", { name: /Stop sharing on/ }).click()
+    await page.getByRole("button", { name: "Go to the Next Month" }).click()
+    await page.getByRole("button", { name: /15th/ }).click()
+    await expect(
+      page.getByRole("button", { name: /Stop sharing on/ })
+    ).toContainText("15")
     await page.getByRole("button", { name: "Share results" }).click()
 
     await expect(
