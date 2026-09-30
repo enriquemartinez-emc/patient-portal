@@ -21,7 +21,6 @@ test.describe("patient", () => {
     for (const card of [
       "Latest results",
       "Who has opened your results",
-      "Who can see your results",
       "Recent access",
     ]) {
       await expect(page.getByText(card, { exact: true })).toBeVisible()

@@ -12,7 +12,6 @@ import { listConsents } from "@/features/consents/repository"
 import { AccessActivityChart } from "@/features/dashboard/components/access-activity-chart"
 import { LatestResultsCard } from "@/features/dashboard/components/latest-results-card"
 import { RecentAccessCard } from "@/features/dashboard/components/recent-access-card"
-import { SharingCard } from "@/features/dashboard/components/sharing-card"
 import { StatTile } from "@/features/dashboard/components/stat-tile"
 import { listLabResults } from "@/features/lab-results/repository"
 import { formatDate } from "@/lib/format"
@@ -34,7 +33,6 @@ export default async function PatientDashboardPage() {
 
   const now = new Date()
   const active = consents.filter((consent) => consent.status === "active")
-  const categories = new Set(results.map((result) => result.category)).size
 
   const since = now.getTime() - RECENT_DAYS * DAY_MS
   const recent = audit.items.filter(
@@ -70,7 +68,7 @@ export default async function PatientDashboardPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-12">
-        <div className="grid grid-cols-2 gap-4 md:col-span-2 lg:col-span-12 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 md:col-span-2 lg:col-span-12">
           <StatTile
             label="Lab results"
             value={results.length}
@@ -79,12 +77,6 @@ export default async function PatientDashboardPage() {
                 ? "None yet"
                 : `Latest collected ${formatDate(results[0].collectedAt)}`
             }
-            href="/patient/lab-results"
-          />
-          <StatTile
-            label="Kinds of test"
-            value={categories}
-            hint="Across your results"
             href="/patient/lab-results"
           />
           <StatTile
@@ -122,13 +114,9 @@ export default async function PatientDashboardPage() {
           </CardContent>
         </Card>
 
-        <SharingCard
-          consents={active}
-          className="md:col-span-1 lg:col-span-6"
-        />
         <RecentAccessCard
           entries={audit.items.slice(0, 5)}
-          className="md:col-span-1 lg:col-span-6"
+          className="md:col-span-2 lg:col-span-12"
         />
       </div>
     </div>
