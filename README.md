@@ -25,8 +25,8 @@ below (the sign-in page lists them too). They all use the password `demo-passwor
 
 | Account | Role | What they can do |
 | --- | --- | --- |
-| `emily.carter@demo.example` | Patient | Has 4 lab results. Shares hematology and lipids with Riverside Clinic. |
-| `james.wilson@demo.example` | Patient | Has 4 lab results. Shares biochemistry with Meridian Research Institute. |
+| `emily.carter@demo.example` | Patient | Has 26 lab results over four blood draws. Shares hematology and lipids with Riverside Clinic. |
+| `james.wilson@demo.example` | Patient | Has 19 lab results over four blood draws. Shares biochemistry with Meridian Research Institute. |
 | `sarah.thompson@demo.example` | Clinician, Northside Clinic | Treats Emily, so sees all her results. |
 | `michael.brown@demo.example` | Clinician, Riverside Clinic | Treats James. Sees only what Emily shared with his clinic. |
 | `laura.davies@demo.example` | Researcher, Meridian Research Institute | Sees James as an anonymous participant, biochemistry only. |
@@ -37,15 +37,16 @@ Use a private window for the second person: Keycloak keeps one sign-in per brows
 same window replaces the first.
 
 1. **As Emily**: the dashboard summarises her results, who can see them and who has opened them. _Lab results_ lists
-   them by kind of test; select a test to open it.
+   them in one table, newest first, with a coloured category for each; use the category links to narrow it, or select a
+   test to open it.
 2. **Consents** (still as Emily): under _Share your results_, choose _Meridian Research Institute_, tick _Lipids_, give a
    reason, and optionally set a date to stop sharing. Select **Share results**. It appears under _Active_.
 3. **As Laura** (private window): _Participants_ now has a second anonymous participant with only _Lipids_. That is
    Emily; the other, _Participant 00000002_, is James. Open her to see just those results. Names are never shown to
    researchers.
-4. **As Sarah**: _Patients_ shows Emily with "You treat this patient". Open her: all four categories are there, with
+4. **As Sarah**: _Patients_ shows Emily with "You treat this patient". Open her: all seven categories are there, with
    a notice that the access is recorded.
-5. **Back as Emily**: _Access history_ now shows "Dr. Sarah Thompson (Northside Clinic) viewed 4 lab results" and Laura's
+5. **Back as Emily**: _Access history_ now shows "Dr. Sarah Thompson (Northside Clinic) viewed 26 lab results" and Laura's
    view. Use the _Show_ filter to narrow it by type.
 6. **As Michael**: Emily appears as "Shared with your organization". Open her: only _Hematology_ and _Lipids_,
    because that is all she shared with his clinic.
@@ -108,3 +109,7 @@ cd web && pnpm exec playwright install chromium && pnpm test:e2e   # browser jou
 - [0001 Core architecture decisions](docs/adr/0001-architecture-decisions.md)
 - [0002 Schema and database roles](docs/adr/0002-schema-and-database-roles.md)
 - [0003 Authentication and authorization](docs/adr/0003-authentication-and-authorization.md)
+
+## Guides
+
+- [Keycloak in the Patient Portal](docs/keycloak.md): how sign-in works, written for someone new to Keycloak
