@@ -12,5 +12,5 @@ Status: accepted
 - **Append-only audit log** enforced by Postgres permissions (`patient_portal_app` has `INSERT, SELECT` only) plus a trigger.
 - **Lifecycle state as sum types**, not enums or booleans.
 - **BFF token isolation.** The browser never receives the Keycloak access token.
-- **`api` and `postgres` publish no host ports.**
+- **Postgres publishes a host port on loopback only**, so the API and web app can run on the host during development. The API publishes none.
 - **Build order:** application first, authentication and authorization afterwards.

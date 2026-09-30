@@ -16,7 +16,7 @@ docker compose up --build
 - Web app: <http://localhost:3000> (the sign-in page lists the demo accounts and their shared password)
 - Keycloak admin console: <http://localhost:8080> (`KEYCLOAK_ADMIN_USER` / `KEYCLOAK_ADMIN_PASSWORD` from `.env`)
 
-The API and Postgres publish no host ports on purpose; only the web app and Keycloak are reachable from the host.
+From your machine you can reach the web app (3000), Keycloak (8080) and Postgres (5432, loopback only). The API is reachable only inside Docker.
 
 ## Using the app
 
@@ -61,6 +61,28 @@ The menu at the top right switches the theme (light, dark or system), opens Sett
 
 `docker compose down -v` stops everything and deletes the data. The next `docker compose up --build` re-creates the
 database with the demo data and re-imports the Keycloak realm. `docker compose down` alone keeps the data.
+
+## Develop
+
+Run the dependencies in Docker and the two apps on your machine. Changes show up as you save, and you can debug from
+your IDE.
+
+```sh
+cp .env.example .env
+cp web/.env.example web/.env.local
+docker compose up -d --wait postgres keycloak migrations    # database, sign-in server, schema and demo data
+
+cd api && dotnet watch run --project PatientPortal.Api      # http://localhost:5246, reloads on save
+cd web && pnpm install && pnpm dev                          # http://localhost:3000, hot reload on save
+```
+
+- Open <http://localhost:3000> and sign in as usual. The API's local settings are in
+  `api/PatientPortal.Api/appsettings.Development.json` and the web app's are in `web/.env.local`. Both hold the same
+  development-only values as `.env.example`, so change them together.
+- To debug, start the API from your IDE with the `http` launch profile instead of `dotnet watch`, and run `pnpm dev`
+  under your IDE's Node debugger.
+- Stop the containerised web app and API first (`docker compose stop web api`): they use the same ports.
+- After adding a migration, apply it with `docker compose up migrations`.
 
 ## How it fits together
 
