@@ -55,14 +55,25 @@ cleanup() {
 }
 trap cleanup INT TERM EXIT
 
-(cd api && exec dotnet watch run --project PatientPortal.Api --non-interactive) 2>&1 | prefix api &
+# Job control puts each app in a background process group, and the terminal stops any background
+# process that reads from it. dotnet watch does (it listens for Ctrl+R), so without `< /dev/null` it
+# is suspended before it starts and the web app runs with no API behind it.
+(cd api && exec dotnet watch run --project PatientPortal.Api --non-interactive) < /dev/null 2>&1 | prefix api &
 api_pid=$!
-(cd web && exec pnpm dev) 2>&1 | prefix web &
+(cd web && exec pnpm dev) < /dev/null 2>&1 | prefix web &
 web_pid=$!
 
 # Announce once the API answers, so nobody signs in while it is still building.
 (
-  until curl -fs -o /dev/null http://localhost:5246/health; do sleep 1; done
+  api_ready=
+  for _ in $(seq 120); do
+    if curl -fs -o /dev/null http://localhost:5246/health; then api_ready=1; break; fi
+    sleep 1
+  done
+  if [ -z "$api_ready" ]; then
+    echo "The API did not answer on http://localhost:5246/health within 2 minutes. Look for errors in the [api] output above." >&2
+    exit 0
+  fi
   cat <<'EOF2'
 
   Ready
