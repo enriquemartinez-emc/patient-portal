@@ -48,6 +48,8 @@ services:
       target: web
     environment:
       API_BASE_URL: http://api:8080
+      # Development "act as" session; removed when real authentication is added.
+      ENABLE_DEV_SESSION: "true"
     ports:
       - "3000:3000"
     depends_on:
