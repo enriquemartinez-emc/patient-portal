@@ -10,8 +10,8 @@ public static class MigrationRunner
     private const int SchemaRunGroup = 1;
     private const int DevSeedRunGroup = 2;
 
-    // Runs the versioned scripts, then sets the password of each login role that was given one.
-    // Migrations must use a direct, non-pooled connection: the password step relies on session state.
+    // Migrations must use a direct, non-pooled connection: the password step relies on session
+    // state.
     public static DatabaseUpgradeResult Run(
         string connectionString,
         string? appRolePassword,

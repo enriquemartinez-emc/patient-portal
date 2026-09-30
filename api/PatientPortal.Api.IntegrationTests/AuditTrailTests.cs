@@ -176,7 +176,6 @@ public sealed class AuditTrailTests(PostgresFixture postgres) : IDisposable
 
         var walked = first.Items.Concat(second.Items).Select(item => item.Id).ToList();
         Assert.Equal(3, walked.Distinct().Count());
-        // uuidv7 ids increase with insertion, and the tiebreaker is id descending.
         Assert.Equal(ids.OrderByDescending(id => id), walked);
     }
 

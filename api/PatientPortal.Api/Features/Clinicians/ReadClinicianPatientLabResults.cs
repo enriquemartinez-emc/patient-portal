@@ -12,8 +12,6 @@ public static class ReadClinicianPatientLabResultsEndpoint
         app.MapGet("/patients/{patientId:guid}/lab-results", Handle)
             .WithName("ClinicianReadPatientLabResults");
 
-    // A treating clinician sees every category; anyone else sees what the patient's consents to the
-    // clinician's organization cover. The audited read itself is shared with the researcher endpoint.
     private static async Task<Results<Ok<ListLabResultsResponse>, ProblemHttpResult>> Handle(
         Guid clinicianId,
         Guid patientId,

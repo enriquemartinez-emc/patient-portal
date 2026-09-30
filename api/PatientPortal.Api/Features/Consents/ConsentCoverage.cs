@@ -6,10 +6,9 @@ namespace PatientPortal.Api.Features.Consents;
 
 internal static class ConsentCoverage
 {
-    // Loads the consents a patient has given an organization and returns the lab categories they
-    // make visible right now. The rows are locked FOR SHARE for the rest of the transaction, so a
-    // concurrent revoke (which takes FOR UPDATE) either finishes first and is seen here, or waits
-    // until the read has committed. The lock is transaction-scoped, so it is pooler-safe.
+    // Rows are locked FOR SHARE until the transaction ends, so a concurrent revoke (FOR UPDATE) is
+    // either seen here or waits for the read to commit. The lock is transaction-scoped, so it is
+    // pooler-safe.
     public static async Task<IReadOnlyList<LabCategory>> CoveredCategoriesAsync(
         NpgsqlConnection connection,
         NpgsqlTransaction transaction,

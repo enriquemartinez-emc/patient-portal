@@ -25,7 +25,6 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar"
 
-// "Dr. Sarah Thompson" -> "ST": first and last name, skipping titles such as "Dr.".
 function initials(name: string): string {
   const words = name.split(" ").filter((word) => word && !word.endsWith("."))
   const first = words[0]?.[0] ?? ""

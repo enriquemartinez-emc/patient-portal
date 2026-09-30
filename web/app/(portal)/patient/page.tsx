@@ -26,7 +26,6 @@ const DAY_MS = 24 * 60 * 60 * 1000
 export default async function PatientDashboardPage() {
   const session = await requireSessionPage("patient")
 
-  // Independent requests start together rather than one after the other.
   const [results, consents, audit] = await Promise.all([
     listLabResults(session.patientId),
     listConsents(session.patientId),

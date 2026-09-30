@@ -1,4 +1,3 @@
-// Who is acting. Each persona carries only the identifier its API routes need.
 export type PatientSession = {
   kind: "patient"
   patientId: string

@@ -5,7 +5,6 @@ import type {
   LabResultGroup,
 } from "@/features/lab-results/types"
 
-// Results grouped by category in the fixed category order, leaving out empty categories.
 export function groupByCategory(
   results: readonly LabResult[]
 ): LabResultGroup[] {
@@ -15,8 +14,6 @@ export function groupByCategory(
   })).filter((group) => group.results.length > 0)
 }
 
-// Newest collection first. Results collected together (one blood draw) are ordered by test name,
-// so the order never depends on how the API happened to return them.
 export function sortNewestFirst(results: readonly LabResult[]): LabResult[] {
   return [...results].sort(
     (a, b) =>
@@ -49,8 +46,6 @@ export function summarize(results: readonly LabResult[]): LabResultsSummary {
   }
 }
 
-// The category named in a `?category=` search parameter, or null when it is missing or not one of
-// ours, so a hand-edited address shows everything instead of nothing.
 export function parseCategoryFilter(
   value: string | string[] | undefined
 ): LabCategory | null {

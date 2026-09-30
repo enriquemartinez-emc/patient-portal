@@ -6,7 +6,6 @@ using PatientPortal.Core.Domain;
 
 namespace PatientPortal.Api.Infrastructure.Auth;
 
-// May this clinician or researcher read this specific patient's lab results, and which categories?
 public sealed class PatientRecordAccessRequirement : IAuthorizationRequirement
 {
     public static readonly PatientRecordAccessRequirement Instance = new();
@@ -32,7 +31,6 @@ public sealed class PatientRecordRequest(
     public NpgsqlTransaction Transaction { get; } = transaction;
     public CancellationToken CancellationToken { get; } = cancellationToken;
 
-    // Set when access is granted: the categories the caller may see.
     public IReadOnlyList<LabCategory> VisibleCategories { get; set; } = [];
 }
 
@@ -45,8 +43,6 @@ public sealed class PatientRecordAccessHandler(TimeProvider time)
         PatientRecordRequest request
     )
     {
-        // A treating clinician sees every category. Everyone else sees what the patient's
-        // consents to their organization cover; no treatment and no consent means no access.
         var categories =
             request.Actor == ActorKind.Clinician && await IsTreatingAsync(request)
                 ? LabCategoryNames.All

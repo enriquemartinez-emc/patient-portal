@@ -42,9 +42,6 @@ public sealed class ConcurrencyTests(PostgresFixture postgres) : IDisposable
     private Task<HttpResponseMessage> ReadAsync(World w) =>
         _api.Client.GetAsync($"/clinicians/{w.Clinician}/patients/{w.Patient}/lab-results");
 
-    // Starts `before` reads, runs the change once a few of them have finished with `settledStatus`
-    // (so both sides of the race exist, however slow the first requests are), then starts `after`
-    // reads once the change has finished. Returns the status of each group.
     private async Task<(
         HttpStatusCode[] Before,
         HttpStatusCode[] After,
@@ -180,15 +177,12 @@ public sealed class ConcurrencyTests(PostgresFixture postgres) : IDisposable
         );
 
         Assert.Equal(HttpStatusCode.NoContent, revoked);
-        // Once the revoke has finished, nothing is served.
         Assert.All(after, status => Assert.Equal(HttpStatusCode.Forbidden, status));
-        // Reads that overlapped the revoke were served whole or refused, never partial or failed.
         Assert.All(
             before,
             status => Assert.Contains(status, new[] { HttpStatusCode.OK, HttpStatusCode.Forbidden })
         );
         Assert.All(served, count => Assert.Equal(3, count));
-        // Every served read and every refusal is in the audit trail, once each.
         var counts = await AuditCountsAsync(w);
         Assert.Equal(served.Count, counts.GetValueOrDefault("lab_results_read"));
         Assert.Equal(
@@ -221,7 +215,6 @@ public sealed class ConcurrencyTests(PostgresFixture postgres) : IDisposable
         );
 
         Assert.Equal(HttpStatusCode.Created, granted);
-        // Once the grant has finished, everything is served.
         Assert.All(after, status => Assert.Equal(HttpStatusCode.OK, status));
         Assert.All(
             before,

@@ -8,7 +8,6 @@ public sealed class HealthEndpointTests
     [Fact]
     public async Task Health_returns_ok()
     {
-        // The data source is created lazily, so health does not need a reachable database.
         await using var factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
             builder.UseSetting("ConnectionStrings:Default", "Host=localhost;Database=unused")
         );

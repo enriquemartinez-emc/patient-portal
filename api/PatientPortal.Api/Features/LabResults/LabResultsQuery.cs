@@ -4,7 +4,6 @@ using PatientPortal.Core.Domain;
 
 namespace PatientPortal.Api.Features.LabResults;
 
-// The category-filtered read used by the clinician and researcher endpoints.
 internal static class LabResultsQuery
 {
     public static async Task<IReadOnlyList<DbLabResultRow>> InCategoriesAsync(

@@ -114,8 +114,6 @@ public static class ConsentRules
             _ => consent,
         };
 
-    // The lab categories a set of consents makes visible: the union of the scopes of those in
-    // effect. Revoked and expired consents contribute nothing.
     public static IReadOnlyList<LabCategory> CoveredCategories(
         IReadOnlyList<ConsentGrant> grants
     ) =>

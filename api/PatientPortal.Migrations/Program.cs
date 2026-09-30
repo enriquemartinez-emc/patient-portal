@@ -7,7 +7,6 @@ if (string.IsNullOrWhiteSpace(connectionString))
     return 1;
 }
 
-// Optional: when unset, a login role keeps whatever password it already has.
 var appRolePassword = Environment.GetEnvironmentVariable("APP_ROLE_PASSWORD");
 var webRolePassword = Environment.GetEnvironmentVariable("WEB_ROLE_PASSWORD");
 

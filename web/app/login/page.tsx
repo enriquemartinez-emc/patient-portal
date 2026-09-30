@@ -20,7 +20,6 @@ export default async function LoginPage() {
   if (session) {
     redirect(`/${session.kind}`)
   }
-  // Signed in with Keycloak, but the login is not linked to a patient, clinician or researcher.
   const unlinked = (await getAuthSession()) !== null
 
   return (

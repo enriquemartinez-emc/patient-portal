@@ -19,7 +19,6 @@ public sealed class FixedTimeProvider(DateTimeOffset now) : TimeProvider
     public override DateTimeOffset GetUtcNow() => Now;
 }
 
-// Tokens signed with a key the test host trusts instead of Keycloak's.
 public static class TestTokens
 {
     public const string Issuer = "http://localhost:8080/realms/patient-portal";
@@ -65,7 +64,6 @@ public static class TestTokens
     }
 }
 
-// Hosts the real API against the shared Postgres container, connecting as the application role.
 public sealed class ApiHarness : IDisposable
 {
     private readonly WebApplicationFactory<Program> _factory;

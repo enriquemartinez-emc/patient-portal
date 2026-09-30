@@ -12,8 +12,6 @@ public static class GetMeEndpoint
     public static void MapGetMeEndpoint(this IEndpointRouteBuilder app) =>
         app.MapGet("/", Handle).WithName("GetMe");
 
-    // Who the signed-in user is in this system: the patient, clinician or researcher record linked to
-    // their login. Only the tables for roles the token holds are searched.
     private static async Task<Results<Ok<MeResponse>, ProblemHttpResult>> Handle(
         ClaimsPrincipal user,
         NpgsqlDataSource dataSource,

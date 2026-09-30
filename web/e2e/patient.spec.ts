@@ -26,7 +26,6 @@ test.describe("patient", () => {
     ]) {
       await expect(page.getByText(card, { exact: true })).toBeVisible()
     }
-    // The five newest results, all from the latest blood draw.
     await expect(page.getByRole("link", { name: "Creatinine" })).toBeVisible()
   })
 
@@ -46,7 +45,6 @@ test.describe("patient", () => {
       await expect(table.getByText(category).first()).toBeVisible()
     }
 
-    // Newest first: the first Hemoglobin row is the May 2026 draw, not the older ones.
     await page.getByRole("link", { name: "Hemoglobin" }).first().click()
     await expect(page).toHaveURL(/\/patient\/lab-results\//)
     await expect(page.getByText("13.4 g/dL")).toBeVisible()
@@ -94,7 +92,6 @@ test.describe("patient", () => {
       "Meridian Research Institute can view your lipids results until"
     )
 
-    // Opening the dialog and keeping access changes nothing.
     await card.getByRole("button", { name: "Revoke access" }).click()
     const dialog = page.getByRole("alertdialog")
     await expect(dialog).toContainText(
@@ -106,7 +103,6 @@ test.describe("patient", () => {
       card.getByRole("button", { name: "Revoke access" })
     ).toBeVisible()
 
-    // Confirming revokes it.
     await card.getByRole("button", { name: "Revoke access" }).click()
     await page
       .getByRole("alertdialog")

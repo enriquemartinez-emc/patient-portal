@@ -5,7 +5,6 @@ import { redirect } from "next/navigation"
 
 import { getAuth } from "@/lib/auth"
 
-// Signing in and out are the two actions that run without a session: one creates it, the other ends it.
 export async function signInAction(): Promise<void> {
   const { url } = await getAuth().api.signInSocial({
     body: { provider: "keycloak", callbackURL: "/", disableRedirect: true },

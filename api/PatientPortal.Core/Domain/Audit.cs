@@ -22,7 +22,6 @@ public sealed record ConsentGranted(ConsentGrantId Consent) : AuditAction;
 
 public sealed record ConsentRevoked(ConsentGrantId Consent) : AuditAction;
 
-// An actor asked to read a patient's records and was refused.
 public sealed record AccessDenied : AuditAction;
 
 public sealed record AuditLogEntry(

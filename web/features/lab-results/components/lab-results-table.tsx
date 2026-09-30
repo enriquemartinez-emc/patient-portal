@@ -15,7 +15,6 @@ import { formatDate } from "@/lib/format"
 
 import { CategoryBadge } from "./category-label"
 
-// Flat table of results sorted newest first. Pass detailHref to make each test name a link.
 export function LabResultsTable({
   results,
   detailHref,

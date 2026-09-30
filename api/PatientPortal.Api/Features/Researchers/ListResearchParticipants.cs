@@ -23,9 +23,7 @@ public static class ListResearchParticipantsEndpoint
             .WithValidation<ListResearchParticipantsRequest>()
             .WithName("ListResearchParticipants");
 
-    // Participants are the patients with an in-effect consent naming the researcher's organization,
-    // with the union of categories those consents cover. The consent predicate mirrors
-    // ConsentRules.ApplyExpiry: a consent stops being in effect at its expiry instant.
+    // The expiry predicate mirrors ConsentRules.ApplyExpiry.
     private static async Task<Ok<PagedResponse<ResearchParticipantResponse>>> Handle(
         Guid researcherId,
         [AsParameters] ListResearchParticipantsRequest request,

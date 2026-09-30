@@ -1,6 +1,5 @@
 import Link from "next/link"
 
-// A headline number that links to where it comes from.
 export function StatTile({
   label,
   value,

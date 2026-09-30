@@ -83,7 +83,6 @@ public sealed class MeEndpointTests(PostgresFixture postgres) : IDisposable
             await SchemaData.InsertOrganizationAsync(owner)
         );
 
-        // The subject belongs to a clinician, but the token claims to be a patient.
         var response = await _api.ClientWith(TestTokens.Create(clinician.ToString(), ["patient"]))
             .GetAsync("/me");
 

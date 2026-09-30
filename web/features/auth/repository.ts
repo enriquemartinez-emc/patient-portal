@@ -11,8 +11,6 @@ const meSchema = z.object({
   name: z.string(),
 })
 
-// Who the signed-in login is in the portal, or null when the API has no matching record (an
-// admin, or a login not linked to a patient, clinician or researcher) or no longer accepts the token.
 export async function getMe(): Promise<Session | null> {
   try {
     const me = await apiGet("/me", meSchema)

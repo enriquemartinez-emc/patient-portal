@@ -1,5 +1,3 @@
-// The demo users in keycloak/realm-export.json, listed on the sign-in page so people know what to
-// type. Keycloak holds the real accounts and checks the password.
 export const DEMO_PASSWORD = "demo-password"
 
 export const demoAccounts = [

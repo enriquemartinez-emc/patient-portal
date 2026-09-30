@@ -78,7 +78,6 @@ export function AccessActivityChart({ days }: { days: DayActivity[] }) {
           />
         </BarChart>
       </ChartContainer>
-      {/* The same numbers as a table, for screen readers. */}
       <table className="sr-only">
         <caption>Times your results were opened each day</caption>
         <thead>

@@ -2,7 +2,6 @@ using PatientPortal.Core.Domain;
 
 namespace PatientPortal.Api.Features.LabResults;
 
-// Shared by every lab result read, which all select the same columns.
 internal sealed record DbLabResultRow(
     Guid Id,
     string Category,

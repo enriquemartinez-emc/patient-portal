@@ -13,7 +13,6 @@ public static class ListOrganizationsEndpoint
     public static void MapListOrganizationsEndpoint(this IEndpointRouteBuilder app) =>
         app.MapGet("/", Handle).WithName("ListOrganizations");
 
-    // The organizations a patient can share records with.
     private static async Task<Ok<ListOrganizationsResponse>> Handle(
         NpgsqlDataSource dataSource,
         CancellationToken ct

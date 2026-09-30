@@ -13,7 +13,6 @@ public sealed class PostgresFixture : IAsyncLifetime
 
     private readonly PostgreSqlContainer _container = new PostgreSqlBuilder("postgres:18").Build();
 
-    // Connects as the migration user, which owns the schema.
     public string OwnerConnectionString => _container.GetConnectionString();
 
     public string AppConnectionString =>
@@ -44,7 +43,6 @@ public sealed class PostgresFixture : IAsyncLifetime
 
     public Task<NpgsqlConnection> OpenWebConnectionAsync() => OpenAsync(WebConnectionString);
 
-    // Creates an empty database in the same container and migrates it.
     public async Task<string> CreateMigratedDatabaseAsync(bool includeDevSeed)
     {
         var name = $"db_{Guid.NewGuid():N}";

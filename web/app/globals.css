@@ -80,9 +80,7 @@
   --sidebar-ring: oklch(0.708 0 0);
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
-  /* One hue per lab category, dark enough for text on a white card. Used for label text, icon
-       tiles and card accents; every label also spells out the category, so colour is never the
-       only signal. */
+  /* One hue per lab category. Every label also names the category, so colour is never the only signal. */
   --lab-hematology: oklch(0.5 0.19 25);
   --lab-biochemistry: oklch(0.5 0.12 65);
   --lab-lipids: oklch(0.5 0.13 145);

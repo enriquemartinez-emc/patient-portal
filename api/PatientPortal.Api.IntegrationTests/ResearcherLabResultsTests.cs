@@ -59,7 +59,6 @@ public sealed class ResearcherLabResultsTests(PostgresFixture postgres) : IDispo
         return [.. body!.Items.Select(item => item.Id)];
     }
 
-    // A refusal returns no data and is recorded in the patient's audit trail as an access_denied entry.
     private async Task AssertRefusedAndRecordedAsync(HttpResponseMessage response, World w)
     {
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);

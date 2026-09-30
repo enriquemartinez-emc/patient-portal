@@ -17,12 +17,10 @@ public static class AuthorizationSetup
     {
         services.AddAuthorization(options =>
         {
-            // Nothing is public unless it says so.
             options.FallbackPolicy = new AuthorizationPolicyBuilder()
                 .RequireAuthenticatedUser()
                 .Build();
 
-            // Roles decide which routes a caller may try; "acting as" ties them to the person in the URL.
             options.AddPolicy(
                 Policies.PatientActing,
                 policy =>

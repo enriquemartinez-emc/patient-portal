@@ -21,7 +21,6 @@ function createAuth() {
     baseURL: required("BETTER_AUTH_URL"),
     secret: required("BETTER_AUTH_SECRET"),
     database: new Pool({ connectionString: required("WEB_DATABASE_URL") }),
-    // Tables and columns follow the database's snake_case naming (see migration 0006).
     user: {
       modelName: "web_users",
       fields: {
@@ -90,9 +89,6 @@ export function getAuth() {
   return (instance ??= createAuth())
 }
 
-// The signed-in user's Keycloak access token, refreshed by Better-Auth when it has expired.
-// Null when nobody is signed in or the refresh token no longer works. Resolved once per request,
-// however many API calls the page makes.
 export const getAccessToken = cache(async (): Promise<string | null> => {
   try {
     const requestHeaders = await headers()

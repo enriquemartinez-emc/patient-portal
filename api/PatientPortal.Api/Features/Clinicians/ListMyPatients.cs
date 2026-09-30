@@ -24,9 +24,7 @@ public static class ListMyPatientsEndpoint
             .WithValidation<ListMyPatientsRequest>()
             .WithName("ListMyPatients");
 
-    // A clinician's patients are those they actively treat plus those who have an in-effect consent
-    // naming the clinician's organization. The consent predicate mirrors ConsentRules.ApplyExpiry:
-    // a consent stops being in effect at its expiry instant.
+    // The expiry predicate mirrors ConsentRules.ApplyExpiry.
     private static async Task<Ok<PagedResponse<PatientSummaryResponse>>> Handle(
         Guid clinicianId,
         [AsParameters] ListMyPatientsRequest request,

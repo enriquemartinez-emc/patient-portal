@@ -53,7 +53,6 @@ public static class AuthenticationSetup
         section[key]
         ?? throw new InvalidOperationException($"Authentication:{key} is not configured.");
 
-    // Keycloak lists realm roles inside the `realm_access` claim; expose them as ordinary roles.
     private static void AddRealmRoles(ClaimsPrincipal? principal)
     {
         if (principal?.Identity is not ClaimsIdentity identity)

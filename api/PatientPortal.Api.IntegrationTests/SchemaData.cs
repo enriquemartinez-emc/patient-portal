@@ -3,7 +3,6 @@ using Npgsql;
 
 namespace PatientPortal.Api.IntegrationTests;
 
-// Inserts through the owner connection so tests can arrange state the app role could not create.
 internal static class SchemaData
 {
     // In tests a person's login subject is their own id, so a token for that id acts as them.

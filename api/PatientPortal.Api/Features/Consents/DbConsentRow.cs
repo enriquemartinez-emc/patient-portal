@@ -2,7 +2,6 @@ using PatientPortal.Core.Domain;
 
 namespace PatientPortal.Api.Features.Consents;
 
-// Shared by every consent read, so the stored-columns -> domain-state translation lives in one place.
 internal sealed record DbConsentRow(
     Guid Id,
     Guid PatientId,
@@ -24,7 +23,6 @@ internal sealed record DbConsentRow(
         join organizations o on o.id = c.grantee_organization_id
         """;
 
-    // A revoked consent stays revoked; otherwise expiry is derived from the clock.
     public ConsentGrant ToConsent(DateTimeOffset now)
     {
         var scope = ToScope();

@@ -73,7 +73,6 @@ public static class StartTreatmentEndpoint
             time.GetUtcNow()
         );
 
-        // The partial unique index allows one active relationship per clinician and patient.
         const string sql = """
             insert into treatment_relationships (id, patient_id, clinician_id, started_at)
             values (@Id, @PatientId, @ClinicianId, @StartedAt)

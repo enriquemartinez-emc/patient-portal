@@ -90,7 +90,6 @@ export async function revokeConsentAction(formData: FormData): Promise<void> {
   try {
     await revokeConsent(session.patientId, consentId.data)
   } catch (error) {
-    // Already gone or already expired: nothing left to revoke, so just show the current state.
     if (!(error instanceof ApiError) || ![404, 409].includes(error.status)) {
       throw error
     }

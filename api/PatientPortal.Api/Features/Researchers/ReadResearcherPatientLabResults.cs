@@ -12,9 +12,6 @@ public static class ReadResearcherPatientLabResultsEndpoint
         app.MapGet("/patients/{patientId:guid}/lab-results", Handle)
             .WithName("ResearcherReadPatientLabResults");
 
-    // Researchers never have a treatment relationship: they see only the categories the patient's
-    // consents to the researcher's organization cover (data minimization). The audited read itself
-    // is shared with the clinician endpoint.
     private static async Task<Results<Ok<ListLabResultsResponse>, ProblemHttpResult>> Handle(
         Guid researcherId,
         Guid patientId,

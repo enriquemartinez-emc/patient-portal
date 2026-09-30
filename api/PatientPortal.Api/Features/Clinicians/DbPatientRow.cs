@@ -1,6 +1,5 @@
 namespace PatientPortal.Api.Features.Clinicians;
 
-// Shared by the clinician's patient list and patient summary.
 internal sealed record DbPatientRow(
     Guid Id,
     string FullName,

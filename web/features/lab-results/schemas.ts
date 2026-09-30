@@ -5,7 +5,6 @@ import type { LabResult } from "@/features/lab-results/types"
 
 // Ids use z.guid(): they come from our own API and only need to be UUID-shaped.
 
-// Categories always arrive in the canonical order, so every screen lists them the same way.
 export const categoriesSchema = z
   .array(z.enum(LAB_CATEGORIES))
   .transform((categories) =>

@@ -26,7 +26,6 @@ function actorLabel(actor: AuditActor): string {
     : `${actor.name} (${actor.organization})`
 }
 
-// One line a patient can read: who did what.
 export function describeAuditEntry(entry: AuditEntry): string {
   const who = actorLabel(entry.actor)
 

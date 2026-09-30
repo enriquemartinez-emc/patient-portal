@@ -14,7 +14,6 @@ import { formatDate } from "@/lib/format"
 
 const list = new Intl.ListFormat("en-GB", { type: "conjunction" })
 
-// What a consent means, in words a patient would use.
 function describe(consent: Consent): string {
   const who = consent.granteeName
   const what = list.format(consent.categories)

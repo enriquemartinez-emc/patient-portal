@@ -39,7 +39,6 @@ export default async function ConsentsPage({
   const session = await requireSessionPage("patient")
   const { error, granted, revoked } = await searchParams
 
-  // Independent requests start together rather than one after the other.
   const [consents, organizations] = await Promise.all([
     listConsents(session.patientId),
     listOrganizations(),

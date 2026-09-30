@@ -10,9 +10,7 @@ public static class GetClinicianPatientEndpoint
     public static void MapGetClinicianPatientEndpoint(this IEndpointRouteBuilder app) =>
         app.MapGet("/patients/{patientId:guid}", Handle).WithName("GetClinicianPatient");
 
-    // One of the clinician's patients, with the basis for the relationship. A patient the clinician
-    // neither treats nor has a consent for is not one of their patients, so it is not found (the
-    // same answer whether that patient exists or not).
+    // Not found whether the patient does not exist or is simply not theirs, so ids cannot be probed.
     private static async Task<Results<Ok<PatientSummaryResponse>, ProblemHttpResult>> Handle(
         Guid clinicianId,
         Guid patientId,

@@ -5,7 +5,6 @@ import { groupByCategory } from "@/features/lab-results/summary"
 import type { LabCategory, LabResult } from "@/features/lab-results/types"
 import { cn } from "@/lib/utils"
 
-// Plain links, not buttons: choosing a category navigates, and the address keeps the choice.
 export function LabCategoryFilter({
   results,
   selected,
@@ -17,7 +16,6 @@ export function LabCategoryFilter({
 }) {
   const groups = groupByCategory(results)
 
-  // Filtering is pointless with fewer than two categories to choose between.
   if (groups.length < 2) {
     return null
   }

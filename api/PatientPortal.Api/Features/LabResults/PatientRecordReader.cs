@@ -17,13 +17,9 @@ internal sealed record RecordReadGranted(IReadOnlyList<DbLabResultRow> Results) 
 
 internal sealed record RecordReadRefused : PatientRecordRead;
 
-// The audited read of one patient's lab results by a clinician or a researcher, shared by both
-// endpoints. It answers in domain terms; turning that into an HTTP response is the endpoint's job.
-//
 // The access check and the read share one transaction, so the treatment and consent rows the check
-// relies on stay locked until the read commits and a revoke cannot slip in between the two. A read
-// is recorded together with its results, so nothing is returned unrecorded, and a refusal is
-// recorded in the patient's audit trail too.
+// relies on stay locked until the read commits. A read is recorded together with its results, so
+// nothing is returned unrecorded, and a refusal is recorded too.
 internal static class PatientRecordReader
 {
     public static Task<PatientRecordRead> ReadAsClinicianAsync(
@@ -141,7 +137,6 @@ internal static class PatientRecordReader
         return new RecordReadGranted(rows);
     }
 
-    // The caller has already been checked to be this clinician or researcher, so the record exists.
     private static Task<Guid> OrganizationOfAsync(
         NpgsqlConnection connection,
         NpgsqlTransaction transaction,

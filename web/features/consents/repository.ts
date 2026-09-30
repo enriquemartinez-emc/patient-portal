@@ -20,7 +20,6 @@ const consentWireSchema = z.object({
 
 type ConsentWire = z.infer<typeof consentWireSchema>
 
-// The API reports one flat shape with nullable dates; each status carries the date that belongs to it.
 function toConsent(wire: ConsentWire): Consent {
   const details = {
     id: wire.id,
