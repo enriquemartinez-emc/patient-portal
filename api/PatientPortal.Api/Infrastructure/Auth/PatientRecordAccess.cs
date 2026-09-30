@@ -4,7 +4,7 @@ using Npgsql;
 using PatientPortal.Api.Features.Consents;
 using PatientPortal.Core.Domain;
 
-namespace PatientPortal.Api.Auth;
+namespace PatientPortal.Api.Infrastructure.Auth;
 
 // May this clinician or researcher read this specific patient's lab results, and which categories?
 public sealed class PatientRecordAccessRequirement : IAuthorizationRequirement

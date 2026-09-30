@@ -1,6 +1,4 @@
 using FluentValidation;
-using Npgsql;
-using PatientPortal.Api.Auth;
 using PatientPortal.Api.Common;
 using PatientPortal.Api.Features.Audit;
 using PatientPortal.Api.Features.Clinicians;
@@ -10,23 +8,21 @@ using PatientPortal.Api.Features.Me;
 using PatientPortal.Api.Features.Organizations;
 using PatientPortal.Api.Features.Researchers;
 using PatientPortal.Api.Features.Treatment;
+using PatientPortal.Api.Infrastructure.Auth;
+using PatientPortal.Api.Infrastructure.Database;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var connectionString =
-    builder.Configuration.GetConnectionString("Default")
-    ?? throw new InvalidOperationException("ConnectionStrings:Default is not configured.");
-
-DapperConfiguration.Register();
-
-builder.Services.AddPortalAuthentication(builder.Configuration).AddPortalAuthorization();
+builder
+    .Services.AddPortalDatabase(builder.Configuration)
+    .AddPortalAuthentication(builder.Configuration)
+    .AddPortalAuthorization();
 builder.Services.AddOpenApi();
 builder.Services.AddHealthChecks();
 builder.Services.AddProblemDetails();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddSingleton(TimeProvider.System);
-builder.Services.AddSingleton(_ => new NpgsqlDataSourceBuilder(connectionString).Build());
 
 var app = builder.Build();
 

@@ -3,7 +3,7 @@ using Dapper;
 using Npgsql;
 using NpgsqlTypes;
 
-namespace PatientPortal.Api.Common;
+namespace PatientPortal.Api.Infrastructure.Database;
 
 public static class DapperConfiguration
 {

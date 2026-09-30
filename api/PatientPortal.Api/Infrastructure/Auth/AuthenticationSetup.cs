@@ -3,7 +3,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
-namespace PatientPortal.Api.Auth;
+namespace PatientPortal.Api.Infrastructure.Auth;
 
 public static class AuthenticationSetup
 {

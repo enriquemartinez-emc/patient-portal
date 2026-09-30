@@ -3,9 +3,9 @@ using Dapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Npgsql;
-using PatientPortal.Api.Auth;
 using PatientPortal.Api.Common;
 using PatientPortal.Api.Features.LabResults;
+using PatientPortal.Api.Infrastructure.Auth;
 using PatientPortal.Core.Domain;
 
 namespace PatientPortal.Api.Features.Researchers;

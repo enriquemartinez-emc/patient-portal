@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 
-namespace PatientPortal.Api.Auth;
+namespace PatientPortal.Api.Infrastructure.Auth;
 
 public static class Policies
 {

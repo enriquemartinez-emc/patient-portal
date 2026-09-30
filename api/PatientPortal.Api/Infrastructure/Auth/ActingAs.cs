@@ -2,7 +2,7 @@ using Dapper;
 using Microsoft.AspNetCore.Authorization;
 using Npgsql;
 
-namespace PatientPortal.Api.Auth;
+namespace PatientPortal.Api.Infrastructure.Auth;
 
 public enum ActorKind
 {

@@ -1,4 +1,4 @@
-using PatientPortal.Api.Auth;
+using PatientPortal.Api.Infrastructure.Auth;
 
 namespace PatientPortal.Api.Features.LabResults;
 

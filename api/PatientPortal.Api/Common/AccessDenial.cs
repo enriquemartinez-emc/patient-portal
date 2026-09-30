@@ -1,9 +1,8 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Npgsql;
-using PatientPortal.Api.Common;
 using PatientPortal.Core.Domain;
 
-namespace PatientPortal.Api.Auth;
+namespace PatientPortal.Api.Common;
 
 public static class AccessDenial
 {
