@@ -15,7 +15,7 @@ public abstract record AccessDecision
 
 public sealed record AccessGranted(IReadOnlyList<LabCategory> VisibleCategories) : AccessDecision;
 
-public sealed record AccessDenied : AccessDecision;
+public sealed record AccessRefused : AccessDecision;
 
 // Decides which of a patient's lab result categories an accessor may see: all of them for a
 // clinician with an active treatment relationship, otherwise the categories the patient's consents
@@ -47,7 +47,7 @@ public static class PatientRecordAccess
                     ct
                 );
 
-        return categories.Count > 0 ? new AccessGranted(categories) : new AccessDenied();
+        return categories.Count > 0 ? new AccessGranted(categories) : new AccessRefused();
     }
 
     // FOR SHARE keeps a concurrent "end treatment" from committing mid-read.
