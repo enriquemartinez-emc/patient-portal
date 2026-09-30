@@ -30,9 +30,9 @@ also see.
 - **Append-only audit log**: every `LabResult` read by a clinician and
   every consent action writes an `AuditLogEntry. The audit table has no
 `UPDATE`/`DELETE` grants at the database permission level.
-- **FCIS on both sides**: pure functions (domain logic, view models,
-  permission checks) stay free of I/O; a thin imperative shell
-  (Server Actions, .NET Handlers) does all fetching/DB/HTTP.
+- **FCIS on both sides**: pure functions (domain logic, view models)
+  stay free of I/O; a thin imperative shell (Server Actions, .NET
+  Handlers) does all fetching/DB/HTTP.
 
 ## Repository structure
 
@@ -44,6 +44,8 @@ docker-compose.yml
 ```
 
 ## Available skills
+
+The `emc-` skills are authoritative: always follow them for code structure, FCIS and endpoints.
 
 - `emc-fcis-feature-slice` — use for any .NET endpoint business
   logic: pure Core plus use-case files, immutable domain records
