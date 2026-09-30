@@ -32,6 +32,7 @@ services:
       target: api
     environment:
       ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__Default: Host=postgres;Database=${POSTGRES_DB};Username=patient_portal_app;Password=${APP_ROLE_PASSWORD}
     depends_on:
       migrations:
         condition: service_completed_successfully

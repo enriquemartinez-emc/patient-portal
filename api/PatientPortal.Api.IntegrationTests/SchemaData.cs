@@ -56,4 +56,91 @@ internal static class SchemaData
             """,
             new { patientId, actorId }
         );
+
+    public static async Task<Guid> InsertLabResultAsync(
+        NpgsqlConnection owner,
+        Guid patientId,
+        string category,
+        string testName,
+        DateTimeOffset collectedAt
+    ) =>
+        await owner.ExecuteScalarAsync<Guid>(
+            """
+            INSERT INTO lab_results (patient_id, category, test_name, value_amount, value_unit, collected_at)
+            VALUES (@patientId, @category, @testName, 4.2, 'mmol/L', @collectedAt)
+            RETURNING id
+            """,
+            new
+            {
+                patientId,
+                category,
+                testName,
+                collectedAt,
+            }
+        );
+
+    public static async Task<Guid> InsertNamedOrganizationAsync(
+        NpgsqlConnection owner,
+        string name
+    ) =>
+        await owner.ExecuteScalarAsync<Guid>(
+            "INSERT INTO organizations (name, kind) VALUES (@name, 'clinic') RETURNING id",
+            new { name }
+        );
+
+    public static async Task<Guid> InsertNamedClinicianAsync(
+        NpgsqlConnection owner,
+        Guid organizationId,
+        string name
+    ) =>
+        await owner.ExecuteScalarAsync<Guid>(
+            "INSERT INTO clinicians (organization_id, full_name) VALUES (@organizationId, @name) RETURNING id",
+            new { organizationId, name }
+        );
+
+    public static async Task<Guid> InsertConsentAtAsync(
+        NpgsqlConnection owner,
+        Guid patientId,
+        Guid granteeId,
+        DateTimeOffset grantedAt,
+        DateTimeOffset? expiresAt = null,
+        DateTimeOffset? revokedAt = null
+    ) =>
+        await owner.ExecuteScalarAsync<Guid>(
+            """
+            INSERT INTO consent_grants (patient_id, grantee_organization_id, categories, purpose, granted_at, expires_at, revoked_at)
+            VALUES (@patientId, @granteeId, ARRAY['lipids'], 'Seeded purpose', @grantedAt, @expiresAt, @revokedAt)
+            RETURNING id
+            """,
+            new
+            {
+                patientId,
+                granteeId,
+                grantedAt,
+                expiresAt,
+                revokedAt,
+            }
+        );
+
+    public static async Task<Guid> InsertAuditEntryAtAsync(
+        NpgsqlConnection owner,
+        Guid patientId,
+        string actorKind,
+        Guid actorId,
+        DateTimeOffset occurredAt
+    ) =>
+        await owner.ExecuteScalarAsync<Guid>(
+            """
+            INSERT INTO audit_log (occurred_at, actor_kind, actor_id, patient_id, action)
+            VALUES (@occurredAt, @actorKind, @actorId, @patientId, 'lab_results_read')
+            RETURNING id
+            """,
+            new
+            {
+                occurredAt,
+                actorKind,
+                actorId,
+                patientId,
+            }
+        );
 }
