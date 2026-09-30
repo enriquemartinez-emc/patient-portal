@@ -13,6 +13,9 @@ function ThemeProvider({
       defaultTheme="system"
       enableSystem
       disableTransitionOnChange
+      // A script whose type isn't JavaScript is never run, and React doesn't flag it. The real
+      // pre-paint script is in app/layout.tsx.
+      scriptProps={{ type: "application/json" }}
       {...props}
     >
       <ThemeHotkey />
