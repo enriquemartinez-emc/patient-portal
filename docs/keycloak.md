@@ -1,7 +1,6 @@
 # Keycloak in the Patient Portal
 
-This guide explains how the portal uses Keycloak. It assumes you have never used Keycloak, OAuth or OpenID Connect
-before. If you only want the decisions and the reasons behind them, read
+This guide explains how the portal uses Keycloak. If you only want the decisions and the reasons behind them, read
 [ADR 0003](adr/0003-authentication-and-authorization.md). This page is the tutorial that explains the words in it.
 
 ## The short version
@@ -26,30 +25,30 @@ to sign people in and vouch for who they are. We hand that job over and keep the
 
 ## Keycloak words in plain language
 
-| Word | What it means | In this app |
-| --- | --- | --- |
-| **Identity provider** | The service that checks who you are. | Keycloak, at `http://localhost:8080`. |
-| **Realm** | A separate space with its own users, roles and settings, like one company's account in a shared product. | One realm, `patient-portal`. |
-| **User** | A person who can sign in. | The demo accounts (Emily, Sarah, Laura and so on). |
-| **Role** | A label on a user that says what kind of user they are. | `patient`, `clinician`, `researcher`, `admin`. |
-| **Client** | An application that is allowed to ask Keycloak to sign people in. | `portal-web` (our web app) and `portal-dev-tools` (local scripts). |
-| **OAuth 2.0 / OpenID Connect (OIDC)** | The standard conversation between an application and an identity provider. OIDC adds "who is this?" on top of OAuth's "what may this app do?". | How `portal-web` talks to Keycloak. |
-| **Authorization code flow** | The OIDC sign-in route where the browser is sent to Keycloak, comes back with a short-lived _code_, and the web server swaps that code for tokens. | The flow we use. |
-| **PKCE** | An extra safeguard on that code swap, so a stolen code is useless. | Switched on for `portal-web`. |
-| **Token** | A small signed package of facts that proves something. | See below. |
-| **JWT** | The format our access tokens use: three base64 parts (header, payload, signature) joined by dots. | What the API reads. |
-| **Claim** | One fact inside a token, such as the user's id or roles. | `sub`, `iss`, `aud`, `realm_access`, and more. |
-| **Issuer (`iss`)** | Who created the token. The API only accepts tokens from Keycloak's realm. | `http://localhost:8080/realms/patient-portal` |
-| **Audience (`aud`)** | Who the token is meant for. A token for another app is refused. | `portal-api` |
-| **Subject (`sub`)** | The user's permanent, unique id in Keycloak. | Links a login to a patient, clinician or researcher row. |
+| Word                                  | What it means                                                                                                                                      | In this app                                                        |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| **Identity provider**                 | The service that checks who you are.                                                                                                               | Keycloak, at `http://localhost:8080`.                              |
+| **Realm**                             | A separate space with its own users, roles and settings, like one company's account in a shared product.                                           | One realm, `patient-portal`.                                       |
+| **User**                              | A person who can sign in.                                                                                                                          | The demo accounts (Emily, Sarah, Laura and so on).                 |
+| **Role**                              | A label on a user that says what kind of user they are.                                                                                            | `patient`, `clinician`, `researcher`, `admin`.                     |
+| **Client**                            | An application that is allowed to ask Keycloak to sign people in.                                                                                  | `portal-web` (our web app) and `portal-dev-tools` (local scripts). |
+| **OAuth 2.0 / OpenID Connect (OIDC)** | The standard conversation between an application and an identity provider. OIDC adds "who is this?" on top of OAuth's "what may this app do?".     | How `portal-web` talks to Keycloak.                                |
+| **Authorization code flow**           | The OIDC sign-in route where the browser is sent to Keycloak, comes back with a short-lived _code_, and the web server swaps that code for tokens. | The flow we use.                                                   |
+| **PKCE**                              | An extra safeguard on that code swap, so a stolen code is useless.                                                                                 | Switched on for `portal-web`.                                      |
+| **Token**                             | A small signed package of facts that proves something.                                                                                             | See below.                                                         |
+| **JWT**                               | The format our access tokens use: three base64 parts (header, payload, signature) joined by dots.                                                  | What the API reads.                                                |
+| **Claim**                             | One fact inside a token, such as the user's id or roles.                                                                                           | `sub`, `iss`, `aud`, `realm_access`, and more.                     |
+| **Issuer (`iss`)**                    | Who created the token. The API only accepts tokens from Keycloak's realm.                                                                          | `http://localhost:8080/realms/patient-portal`                      |
+| **Audience (`aud`)**                  | Who the token is meant for. A token for another app is refused.                                                                                    | `portal-api`                                                       |
+| **Subject (`sub`)**                   | The user's permanent, unique id in Keycloak.                                                                                                       | Links a login to a patient, clinician or researcher row.           |
 
 ### The three kinds of token
 
-| Token | Purpose | Lifetime here | Who holds it |
-| --- | --- | --- | --- |
-| **Access token** | Shown to the API to prove who is calling. | About 5 minutes. | The web server only. |
-| **Refresh token** | Gets a fresh access token without asking the person to sign in again. | Longer. | The web server only. |
-| **ID token** | Tells the web app who just signed in. The API rejects it, because it is addressed to the web client. | Short. | The web server only. |
+| Token             | Purpose                                                                                              | Lifetime here    | Who holds it         |
+| ----------------- | ---------------------------------------------------------------------------------------------------- | ---------------- | -------------------- |
+| **Access token**  | Shown to the API to prove who is calling.                                                            | About 5 minutes. | The web server only. |
+| **Refresh token** | Gets a fresh access token without asking the person to sign in again.                                | Longer.          | The web server only. |
+| **ID token**      | Tells the web app who just signed in. The API rejects it, because it is addressed to the web client. | Short.           | The web server only. |
 
 Short-lived access tokens limit the damage if one ever leaks. The refresh token is what keeps people signed in.
 
@@ -68,10 +67,10 @@ in the web app.
 
 **Two clients:**
 
-| Client | Who uses it | Key settings |
-| --- | --- | --- |
-| `portal-web` | The Next.js web app, acting on behalf of a signed-in person. | _Confidential_: it has a client secret that only the web server knows. Authorization code flow with PKCE. Only `http://localhost:3000/*` may receive the sign-in redirect. |
-| `portal-dev-tools` | Local scripts and tests that need a token for a demo user without a browser. | _Public_ with direct username and password login. **Development only.** |
+| Client             | Who uses it                                                                  | Key settings                                                                                                                                                               |
+| ------------------ | ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `portal-web`       | The Next.js web app, acting on behalf of a signed-in person.                 | _Confidential_: it has a client secret that only the web server knows. Authorization code flow with PKCE. Only `http://localhost:3000/*` may receive the sign-in redirect. |
+| `portal-dev-tools` | Local scripts and tests that need a token for a demo user without a browser. | _Public_ with direct username and password login. **Development only.**                                                                                                    |
 
 Both clients carry an **audience mapper** that adds `portal-api` to the access token's `aud` claim. Without it the API
 would refuse the token.
@@ -138,12 +137,12 @@ and actions.
 
 The API never asks Keycloak "is this token real?". It checks the token itself:
 
-| Check | What it proves |
-| --- | --- |
-| **Signature**, against Keycloak's public keys | Keycloak created it and nobody changed it. The keys come from Keycloak's published key list (the JWKS address) and are cached. |
-| **Issuer** is our realm | It came from the right Keycloak realm. |
-| **Audience** is `portal-api` | It was meant for this API, not another application. |
-| **Expiry** has not passed (30 seconds of leeway for clock differences) | It is still fresh. |
+| Check                                                                  | What it proves                                                                                                                 |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| **Signature**, against Keycloak's public keys                          | Keycloak created it and nobody changed it. The keys come from Keycloak's published key list (the JWKS address) and are cached. |
+| **Issuer** is our realm                                                | It came from the right Keycloak realm.                                                                                         |
+| **Audience** is `portal-api`                                           | It was meant for this API, not another application.                                                                            |
+| **Expiry** has not passed (30 seconds of leeway for clock differences) | It is still fresh.                                                                                                             |
 
 If any check fails, the API answers `401`. The API keeps no sessions and stores no logins, so it is a stateless
 _resource server_.
@@ -176,12 +175,12 @@ account, gets a "no portal access" page.
 
 This is the most important boundary in the design.
 
-| Question | Decided by | How |
-| --- | --- | --- |
-| Is this person who they say they are? | **Keycloak** | Password check on its own page. |
-| What kind of user is this? | **Keycloak** | Realm role in the token. |
-| Is this caller the person named in the URL (`/patients/{id}`)? | **The API** | Token `sub` matched to the row's `external_subject_id`. |
-| May this clinician or researcher read _this patient's_ results, and which categories? | **The API** | An active treatment relationship, or a consent, in Postgres. Checked on every read and recorded in the audit log. |
+| Question                                                                              | Decided by   | How                                                                                                               |
+| ------------------------------------------------------------------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------- |
+| Is this person who they say they are?                                                 | **Keycloak** | Password check on its own page.                                                                                   |
+| What kind of user is this?                                                            | **Keycloak** | Realm role in the token.                                                                                          |
+| Is this caller the person named in the URL (`/patients/{id}`)?                        | **The API**  | Token `sub` matched to the row's `external_subject_id`.                                                           |
+| May this clinician or researcher read _this patient's_ results, and which categories? | **The API**  | An active treatment relationship, or a consent, in Postgres. Checked on every read and recorded in the audit log. |
 
 A role such as `clinician` only says which doors to try. It never opens a patient's record by itself. That is deliberate:
 roles are coarse, records are personal, and consent can change minute by minute.
@@ -227,41 +226,41 @@ imports again; see the README). Changes made in the admin console are not writte
 
 ## Configuration reference
 
-| Where | Setting | Why it matters |
-| --- | --- | --- |
-| `docker-compose.yml` | `KC_HOSTNAME=http://localhost:8080` | Fixes the **issuer** written into every token, however the request reached Keycloak. |
-| `docker-compose.yml` | `KC_HOSTNAME_BACKCHANNEL_DYNAMIC=true` | Lets server-to-server addresses (such as the key list) follow whoever is asking: `keycloak:8080` inside Docker, `localhost:8080` from your machine. |
-| `.env` | `KEYCLOAK_ADMIN_USER`, `KEYCLOAK_ADMIN_PASSWORD` | The first admin account for the console. |
-| `.env` | `KEYCLOAK_PORTAL_WEB_SECRET` | The `portal-web` client secret. Keep it out of the browser and out of commits. |
-| `web/.env.local` | `KEYCLOAK_ISSUER`, `KEYCLOAK_CLIENT_SECRET` | How the web server finds Keycloak and proves it is `portal-web`. |
-| `api/PatientPortal.Api/appsettings*.json` | `Authentication:MetadataAddress`, `ValidIssuer`, `Audience` | Where the API fetches Keycloak's keys, and what it demands of a token. |
+| Where                                     | Setting                                                     | Why it matters                                                                                                                                      |
+| ----------------------------------------- | ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docker-compose.yml`                      | `KC_HOSTNAME=http://localhost:8080`                         | Fixes the **issuer** written into every token, however the request reached Keycloak.                                                                |
+| `docker-compose.yml`                      | `KC_HOSTNAME_BACKCHANNEL_DYNAMIC=true`                      | Lets server-to-server addresses (such as the key list) follow whoever is asking: `keycloak:8080` inside Docker, `localhost:8080` from your machine. |
+| `.env`                                    | `KEYCLOAK_ADMIN_USER`, `KEYCLOAK_ADMIN_PASSWORD`            | The first admin account for the console.                                                                                                            |
+| `.env`                                    | `KEYCLOAK_PORTAL_WEB_SECRET`                                | The `portal-web` client secret. Keep it out of the browser and out of commits.                                                                      |
+| `web/.env.local`                          | `KEYCLOAK_ISSUER`, `KEYCLOAK_CLIENT_SECRET`                 | How the web server finds Keycloak and proves it is `portal-web`.                                                                                    |
+| `api/PatientPortal.Api/appsettings*.json` | `Authentication:MetadataAddress`, `ValidIssuer`, `Audience` | Where the API fetches Keycloak's keys, and what it demands of a token.                                                                              |
 
 ## Common problems
 
-| Symptom | Likely cause and fix |
-| --- | --- |
-| The API answers `401` though you are signed in. | The token's issuer does not match `ValidIssuer`. Reach Keycloak as `http://localhost:8080` everywhere on your machine. A different hostname makes Keycloak write a different `iss`. |
-| Keycloak shows "Invalid redirect URI". | The web app is not at `http://localhost:3000`. Only that address is allowed for `portal-web`. |
-| Signing in as a second person logs the first one out. | Keycloak keeps one sign-in per browser. Use a private window. |
-| You sign in and see "no portal access". | The login has no matching patient, clinician or researcher row. Expected for `admin@demo.example`. |
-| A new user cannot sign in to anything useful. | Keycloak only proves who they are. Add a row with their `sub` as `external_subject_id`, or they have no record to open. |
-| Keycloak never becomes ready. | Give it about 30 seconds on first start. `./dev.sh` waits for its health check. |
+| Symptom                                               | Likely cause and fix                                                                                                                                                                |
+| ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The API answers `401` though you are signed in.       | The token's issuer does not match `ValidIssuer`. Reach Keycloak as `http://localhost:8080` everywhere on your machine. A different hostname makes Keycloak write a different `iss`. |
+| Keycloak shows "Invalid redirect URI".                | The web app is not at `http://localhost:3000`. Only that address is allowed for `portal-web`.                                                                                       |
+| Signing in as a second person logs the first one out. | Keycloak keeps one sign-in per browser. Use a private window.                                                                                                                       |
+| You sign in and see "no portal access".               | The login has no matching patient, clinician or researcher row. Expected for `admin@demo.example`.                                                                                  |
+| A new user cannot sign in to anything useful.         | Keycloak only proves who they are. Add a row with their `sub` as `external_subject_id`, or they have no record to open.                                                             |
+| Keycloak never becomes ready.                         | Give it about 30 seconds on first start. `./dev.sh` waits for its health check.                                                                                                     |
 
 ## Where to look in the code
 
-| What | File |
-| --- | --- |
-| The realm: roles, clients, demo users | `keycloak/realm-export.json` |
-| Keycloak container and hostname settings | `docker-compose.yml` |
-| The web app as an OIDC client (Better-Auth) | `web/lib/auth.ts` |
-| Sign in and sign out actions | `web/features/auth/actions.ts` |
-| Who is signed in, and page and action guards | `web/features/auth/session.ts`, `web/features/auth/repository.ts` |
-| Sending the token to the API | `web/lib/api/server.ts` |
-| Redirect when there is no session cookie | `web/proxy.ts` |
-| The API validating the token and reading roles | `api/PatientPortal.Api/Infrastructure/Auth/AuthenticationSetup.cs` |
+| What                                                     | File                                                                             |
+| -------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| The realm: roles, clients, demo users                    | `keycloak/realm-export.json`                                                     |
+| Keycloak container and hostname settings                 | `docker-compose.yml`                                                             |
+| The web app as an OIDC client (Better-Auth)              | `web/lib/auth.ts`                                                                |
+| Sign in and sign out actions                             | `web/features/auth/actions.ts`                                                   |
+| Who is signed in, and page and action guards             | `web/features/auth/session.ts`, `web/features/auth/repository.ts`                |
+| Sending the token to the API                             | `web/lib/api/server.ts`                                                          |
+| Redirect when there is no session cookie                 | `web/proxy.ts`                                                                   |
+| The API validating the token and reading roles           | `api/PatientPortal.Api/Infrastructure/Auth/AuthenticationSetup.cs`               |
 | Route rules: role plus "acting as" the person in the URL | `api/PatientPortal.Api/Infrastructure/Auth/AuthorizationSetup.cs`, `ActingAs.cs` |
-| Treatment and consent access to a patient's results | `api/PatientPortal.Api/Infrastructure/Auth/PatientRecordAccess.cs` |
-| Linking a login to a record | `api/PatientPortal.Api/Features/Me/GetMe.cs` |
+| Treatment and consent access to a patient's results      | `api/PatientPortal.Api/Infrastructure/Auth/PatientRecordAccess.cs`               |
+| Linking a login to a record                              | `api/PatientPortal.Api/Features/Me/GetMe.cs`                                     |
 
 ## Glossary
 
