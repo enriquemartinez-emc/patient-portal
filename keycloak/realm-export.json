@@ -1,0 +1,198 @@
+{
+  "realm": "patient-portal",
+  "enabled": true,
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "roles": {
+    "realm": [
+      {
+        "name": "patient"
+      },
+      {
+        "name": "clinician"
+      },
+      {
+        "name": "researcher"
+      },
+      {
+        "name": "admin"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "portal-web",
+      "name": "Patient Portal web (BFF)",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "secret": "${KEYCLOAK_PORTAL_WEB_SECRET}",
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": [
+        "http://localhost:3000/*"
+      ],
+      "webOrigins": [
+        "http://localhost:3000"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:3000/*"
+      },
+      "protocolMappers": [
+        {
+          "name": "portal-api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.custom.audience": "portal-api",
+            "id.token.claim": "false",
+            "access.token.claim": "true",
+            "introspection.token.claim": "true"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "portal-dev-tools",
+      "name": "Local development only: scripts that need a token for a demo user",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "protocolMappers": [
+        {
+          "name": "portal-api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.custom.audience": "portal-api",
+            "id.token.claim": "false",
+            "access.token.claim": "true",
+            "introspection.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "id": "90000000-0000-0000-0000-000000000001",
+      "username": "emily.carter@demo.example",
+      "email": "emily.carter@demo.example",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Emily",
+      "lastName": "Carter",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "demo-password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "patient"
+      ]
+    },
+    {
+      "id": "90000000-0000-0000-0000-000000000002",
+      "username": "james.wilson@demo.example",
+      "email": "james.wilson@demo.example",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "James",
+      "lastName": "Wilson",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "demo-password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "patient"
+      ]
+    },
+    {
+      "id": "90000000-0000-0000-0000-000000000003",
+      "username": "sarah.thompson@demo.example",
+      "email": "sarah.thompson@demo.example",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Sarah",
+      "lastName": "Thompson",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "demo-password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "clinician"
+      ]
+    },
+    {
+      "id": "90000000-0000-0000-0000-000000000004",
+      "username": "michael.brown@demo.example",
+      "email": "michael.brown@demo.example",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Michael",
+      "lastName": "Brown",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "demo-password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "clinician"
+      ]
+    },
+    {
+      "id": "90000000-0000-0000-0000-000000000005",
+      "username": "laura.davies@demo.example",
+      "email": "laura.davies@demo.example",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Laura",
+      "lastName": "Davies",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "demo-password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "researcher"
+      ]
+    },
+    {
+      "id": "90000000-0000-0000-0000-000000000009",
+      "username": "admin@demo.example",
+      "email": "admin@demo.example",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Portal",
+      "lastName": "Admin",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "demo-password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "admin"
+      ]
+    }
+  ]
+}

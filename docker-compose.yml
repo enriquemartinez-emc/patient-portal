@@ -13,6 +13,37 @@ services:
       timeout: 3s
       retries: 10
 
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.7
+    command: ["start-dev", "--import-realm"]
+    environment:
+      # The browser reaches Keycloak at localhost:8080 and containers at keycloak:8080. The public
+      # URL fixes the token issuer; the dynamic backchannel makes the JWKS URL follow the caller.
+      KC_HOSTNAME: http://localhost:8080
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
+      KC_HTTP_ENABLED: "true"
+      KC_HEALTH_ENABLED: "true"
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USER}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KEYCLOAK_PORTAL_WEB_SECRET: ${KEYCLOAK_PORTAL_WEB_SECRET}
+    volumes:
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test:
+        - CMD
+        - bash
+        - -c
+        - >-
+          exec 3<>/dev/tcp/127.0.0.1/9000 &&
+          printf 'GET /health/ready HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3 &&
+          grep -q '"status": "UP"' <&3
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+
   migrations:
     build:
       context: ./api
@@ -33,9 +64,16 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__Default: Host=postgres;Database=${POSTGRES_DB};Username=patient_portal_app;Password=${APP_ROLE_PASSWORD}
+      # Keys come from the internal address; the issuer is the public one (see keycloak below).
+      Authentication__MetadataAddress: http://keycloak:8080/realms/patient-portal/.well-known/openid-configuration
+      Authentication__ValidIssuer: http://localhost:8080/realms/patient-portal
+      Authentication__Audience: portal-api
+      Authentication__RequireHttpsMetadata: "false"
     depends_on:
       migrations:
         condition: service_completed_successfully
+      keycloak:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://localhost:8080/health"]
       interval: 5s
