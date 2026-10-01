@@ -43,7 +43,7 @@ done
 echo "Starting Postgres, Keycloak and the database migrations..."
 docker compose stop web api >/dev/null 2>&1 || true # the containerised copies use the same ports
 docker compose up -d --wait postgres keycloak
-migration_log=$(docker compose run --rm --quiet-pull migrations 2>&1) || { echo "$migration_log" >&2; exit 1; }
+migration_log=$(docker compose run --rm --build --quiet-pull migrations 2>&1) || { echo "$migration_log" >&2; exit 1; }
 
 [ -d web/node_modules ] || (cd web && pnpm install)
 
