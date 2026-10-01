@@ -58,7 +58,7 @@ The `emc-` skills are authoritative: always follow them for code structure, FCIS
   HTTP contracts, validation, OpenAPI, or resource creation responses
 - `neon-postgres` - use when working with postgresql
 - `vercel-react-best-practices` - use when working with Nextjs
-- `shadcn` - use when using shadcn ui components, use Sonnet 5.5 at low effort to work with this skill.
+- `shadcn` - use when using shadcn ui components
 
 ## Known gotchas
 
@@ -73,14 +73,6 @@ The `emc-` skills are authoritative: always follow them for code structure, FCIS
 - Test behavior, concurrency invariants, and state transitions.
 - After C# changes, run `dotnet csharpier format .`.
 - After frontend changes, run prettier.
-- Use Conventional Commits for completed changes.
-- Use playwright cli skill only when approved.
-- Run e2e (Playwright) tests only when the user commands it.
-- For frontend changes, edit components and make all needed changes without asking. Ask for approval to verify with Playwright (tests or screenshots) only right before committing, not earlier.
+- Use Conventional Commits for completed changes, with concise, descriptive messages.
 - Never read, modify or do any type of manipulation of confidential information like secret or private keys.
 - Format Nextjs .ts/tsx files after every change.
-
-## Git Commit Guidelines
-
-- Never include AI attribution, co-authorship tags, or session links in git commits.
-- Keep commit messages concise, descriptive, and strictly attributed to the local git author.
