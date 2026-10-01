@@ -1,6 +1,6 @@
 ## What this is
 
-A GDPR-hardened patient portal. Patients view lab results and
+A patient portal. Patients view lab results and
 control which clinics/researchers can access their records. Clinicians
 view records only for patients they treat or have been granted consent
 for. Every access is logged in an append-only audit trail patients can

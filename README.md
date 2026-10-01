@@ -4,6 +4,10 @@ Patients see their lab results and decide which clinics and researchers can see 
 treat or who have shared with their organization. Every read, refusal and consent change goes into an append-only audit
 trail that patients can read.
 
+![The patient dashboard: lab results, who can see them, and who has opened them](docs/screenshots/dashboard.png)
+
+![The consents page: share results with a clinic or institution, and revoke access at any time](docs/screenshots/consents.png)
+
 ## Run it
 
 Requires Docker.
@@ -103,9 +107,3 @@ cd api && dotnet csharpier check . && dotnet test PatientPortal.slnx   # integra
 cd web && pnpm lint && pnpm typecheck && pnpm format:check && pnpm test && pnpm build
 cd web && pnpm exec playwright install chromium && pnpm test:e2e   # browser journeys against a running stack
 ```
-
-## Decisions
-
-- [0001 Core architecture decisions](docs/adr/0001-architecture-decisions.md)
-- [0002 Schema and database roles](docs/adr/0002-schema-and-database-roles.md)
-- [0003 Authentication and authorization](docs/adr/0003-authentication-and-authorization.md)
